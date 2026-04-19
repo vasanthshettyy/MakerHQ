@@ -11,36 +11,37 @@ import {
     Settings,
     LogOut,
     User,
-    ChevronRight,
-    ChevronLeft
+    Sparkles,
+    ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { usePlatformSettings } from '../../hooks/usePlatformSettings';
 import { cn } from '../../lib/utils';
+import { PREMIUM_SPRING, MICRO_INTERACTION } from '../../lib/motion';
 import makerhqMark from '../../assets/makerhq-mark.png';
 
 const ROLE_NAV_CONFIG = {
     brand: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/brand/dashboard' },
         { id: 'discovery', label: 'Discovery', icon: Search, path: '/brand/discover' },
-        { id: 'gigs', label: 'My Gigs', icon: Briefcase, path: '/brand/gigs' },
+        { id: 'gigs', label: 'Campaigns', icon: Briefcase, path: '/brand/gigs' },
         { id: 'contracts', label: 'Contracts', icon: FileText, path: '/brand/contracts' },
         { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/brand/messages' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/brand/settings' },
     ],
     influencer: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/influencer/dashboard' },
-        { id: 'discovery', label: 'Discovery', icon: Search, path: '/influencer/gigs' },
-        { id: 'proposals', label: 'Proposals', icon: Send, path: '/influencer/proposals' },
+        { id: 'discovery', label: 'Find Gigs', icon: Search, path: '/influencer/gigs' },
+        { id: 'proposals', label: 'My Bids', icon: Send, path: '/influencer/proposals' },
         { id: 'contracts', label: 'Contracts', icon: FileText, path: '/influencer/contracts' },
         { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/influencer/messages' },
     ],
     admin: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
-        { id: 'users', label: 'Users', icon: User, path: '/admin/users' },
-        { id: 'gigs', label: 'Gigs', icon: Briefcase, path: '/admin/gigs' },
-        { id: 'verification', label: 'Verification', icon: FileText, path: '/admin/verification' },
+        { id: 'dashboard', label: 'Insights', icon: LayoutDashboard, path: '/admin/dashboard' },
+        { id: 'users', label: 'Directory', icon: User, path: '/admin/users' },
+        { id: 'gigs', label: 'Moderation', icon: ShieldCheck, path: '/admin/gigs' },
+        { id: 'verification', label: 'Compliance', icon: FileText, path: '/admin/verification' },
+        { id: 'settings', label: 'Engine', icon: Settings, path: '/admin/settings' },
     ],
 };
 
@@ -48,100 +49,101 @@ export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const { role, profile, user, signOut } = useAuth();
     const { isDark } = useTheme();
-    // eslint-disable-next-line no-unused-vars
-    const { settings } = usePlatformSettings();
     const location = useLocation();
 
-    // Phase 10 scaffold only; chat visibility can be gated by settings.enableChat
-    const rawNavItems = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.brand;
-
-    // In next sprint, we can filter like this:
-    // const navItems = rawNavItems.filter(item => item.id !== 'messages' || settings.enableChat);
-    const navItems = rawNavItems;
-
-    const displayName = profile?.display_name || profile?.full_name || user?.email?.split('@')[0] || 'User';
-
-    const handleSignOut = async () => {
-        try {
-            await signOut();
-        } catch (err) {
-            console.error('Error signing out:', err);
-        }
-    };
+    const navItems = ROLE_NAV_CONFIG[role] || ROLE_NAV_CONFIG.brand;
+    const displayName = profile?.company_name || profile?.full_name || profile?.display_name || user?.email?.split('@')[0] || 'Member';
 
     return (
         <motion.aside
             initial={false}
-            animate={{ width: isCollapsed ? 80 : 260 }}
+            animate={{ width: isCollapsed ? 88 : 280 }}
             onMouseEnter={() => setIsCollapsed(false)}
             onMouseLeave={() => setIsCollapsed(true)}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={PREMIUM_SPRING}
             className={cn(
-                "z-50 hidden md:flex flex-col h-full page-enter",
-                "backdrop-blur-xl border border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative",
-                isDark ? "bg-black/40" : "bg-white/30"
+                "z-50 hidden lg:flex flex-col h-full relative group/sidebar",
+                "glass-card !rounded-[2.5rem] border-white/10 shadow-2xl overflow-hidden",
+                isDark ? "bg-surface-950/40" : "bg-white/30"
             )}
         >
-            {/* Logo Section */}
-            <div className={cn("p-6 mb-4 flex items-center gap-3", isCollapsed && "justify-center px-0")}>
-                <img
-                    src={makerhqMark}
-                    alt="MakerHQ"
-                    className="w-10 h-10 object-contain shrink-0"
-                />
-                {!isCollapsed && (
-                    <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-indigo-500 tracking-tight"
-                    >
-                        MakerHQ
-                    </motion.span>
-                )}
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/10 to-transparent opacity-30" />
+
+            {/* Header: Logo */}
+            <div className={cn("p-6 flex items-center gap-4 relative", isCollapsed ? "justify-center" : "px-7")}>
+                <motion.div 
+                    {...MICRO_INTERACTION}
+                    className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-secondary p-[1px] shadow-xl shadow-primary/20 flex-shrink-0"
+                >
+                    <div className="w-full h-full rounded-[15px] bg-surface-950 flex items-center justify-center overflow-hidden">
+                        <img src={makerhqMark} alt="M" className="w-6 h-6 object-contain" />
+                    </div>
+                </motion.div>
+                
+                <AnimatePresence>
+                    {!isCollapsed && (
+                        <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            className="flex flex-col min-w-0"
+                        >
+                            <span className="text-lg font-display font-black text-white tracking-tight leading-none uppercase">MakerHQ</span>
+                            <span className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mt-1.5 opacity-80">Sync Platform</span>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 space-y-2">
+            <nav className="flex-1 px-4 space-y-2 mt-6 relative overflow-y-auto overflow-x-hidden scrollbar-hide">
                 {navItems.map((item) => {
-                    const isActive = location.pathname === item.path;
+                    const isActive = location.pathname.startsWith(item.path);
                     const Icon = item.icon;
 
                     return (
-                        <NavLink key={item.id} to={item.path} className="block relative group">
+                        <NavLink key={item.id} to={item.path} className="block group/nav">
                             <motion.div
                                 className={cn(
-                                    "relative flex items-center h-12 rounded-2xl transition-all duration-200 px-3",
-                                    isActive ? "text-white" : "text-white opacity-60 hover:opacity-100"
+                                    "relative flex items-center h-12 rounded-2xl transition-all duration-300 px-4",
+                                    isActive 
+                                        ? "text-white bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] border border-white/5" 
+                                        : "text-text-muted hover:text-white hover:bg-white/[0.04]"
                                 )}
-                                style={isActive ? {
-                                    background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%)',
-                                    borderLeft: '3px solid var(--color-primary)'
-                                } : {}}
                             >
-                                <div
-                                    className={cn(
-                                        "flex items-center justify-center group-hover:scale-110",
-                                        isCollapsed ? "w-full" : "w-6"
-                                    )}
-                                    style={{ transition: 'all 0.2s ease' }}
-                                >
-                                    <Icon size={20} />
+                                {isActive && (
+                                    <motion.div 
+                                        layoutId="sidebar-active-pill"
+                                        className="absolute left-0 w-1.5 h-5 bg-primary rounded-r-full shadow-glow"
+                                        transition={PREMIUM_SPRING}
+                                    />
+                                )}
+
+                                <div className={cn(
+                                    "flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/nav:scale-110",
+                                    isActive ? "text-primary" : "text-inherit"
+                                )}>
+                                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                                 </div>
 
-                                {isCollapsed && (
-                                    <span className="absolute left-full ml-3 px-2 py-1 text-xs font-bold text-white bg-surface-800 rounded-lg opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none z-50 shadow-lg border border-white/10">
-                                        {item.label}
-                                    </span>
-                                )}
+                                <AnimatePresence>
+                                    {!isCollapsed && (
+                                        <motion.span
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            className="ml-4 text-[13px] font-black uppercase tracking-widest whitespace-nowrap"
+                                        >
+                                            {item.label}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
 
-                                {!isCollapsed && (
-                                    <motion.span
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        className="ml-3 font-medium whitespace-nowrap"
-                                    >
+                                {isCollapsed && (
+                                    <div className="absolute left-full ml-6 px-4 py-2.5 rounded-xl bg-surface-950 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-elevated z-50">
                                         {item.label}
-                                    </motion.span>
+                                    </div>
                                 )}
                             </motion.div>
                         </NavLink>
@@ -149,82 +151,60 @@ export default function Sidebar() {
                 })}
             </nav>
 
-            {/* Bottom Section */}
-            <div className="p-3 space-y-4">
-                {/* Mini Profile Card */}
-                <Link
-                    to={role === 'influencer' ? '/influencer/profile' : `/${role}/settings`}
-                    className="block w-full min-h-[44px] outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl transition-all"
-                    aria-label="View Profile"
-                >
+            {/* Bottom Actions: Profile & Exit */}
+            <div className="p-4 mt-auto space-y-3 relative">
+                <Link to={role === 'influencer' ? '/influencer/profile' : `/${role}/settings`}>
                     <motion.div
-                        whileHover="hover"
-                        initial="rest"
+                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
                         className={cn(
-                            "relative overflow-hidden rounded-2xl p-2 transition-all duration-500",
-                            "bg-white/5 border border-white/5 backdrop-blur-md",
-                            isCollapsed ? "flex justify-center" : "flex items-center gap-3"
+                            "flex items-center gap-3 p-2.5 rounded-[1.75rem] border border-transparent transition-all cursor-pointer",
+                            !isCollapsed && "hover:border-white/10"
                         )}
                     >
-                        <motion.div
-                            variants={{
-                                rest: { opacity: 0 },
-                                hover: { opacity: 1 }
-                            }}
-                            className="absolute inset-0 bg-white/5 -z-10"
-                        />
-                        <motion.div
-                            variants={{
-                                rest: { scale: 1 },
-                                hover: { scale: 1.05 }
-                            }}
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0 shadow-inner overflow-hidden"
-                        >
-                            {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <User size={20} />
-                            )}
-                        </motion.div>
-                        <AnimatePresence>
-                            {!isCollapsed && (
-                                <motion.div
-                                    initial={{ opacity: 0, width: 0 }}
-                                    animate={{ opacity: 1, width: "auto" }}
-                                    exit={{ opacity: 0, width: 0 }}
-                                    className="flex flex-col min-w-0"
-                                >
-                                    <span className="text-sm font-semibold text-white truncate">{displayName}</span>
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
-                                        {role || 'Member'}
-                                    </span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        <div className="relative shrink-0">
+                            <div className="w-11 h-11 rounded-2xl bg-surface-800 border border-white/10 overflow-hidden shadow-inner p-0.5">
+                                {profile?.avatar_url || profile?.logo_url ? (
+                                    <img src={profile.avatar_url || profile.logo_url} alt="" className="w-full h-full object-cover rounded-[14px]" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-700 to-surface-900 text-white font-black text-xs uppercase">
+                                        {displayName.charAt(0)}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success border-2 border-surface-950 rounded-full shadow-lg shadow-success/20" />
+                        </div>
+
+                        {!isCollapsed && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex flex-col min-w-0"
+                            >
+                                <span className="text-sm font-bold text-white truncate leading-tight">{displayName}</span>
+                                <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5">
+                                    <div className="w-1 h-1 rounded-full bg-primary" />
+                                    {role} Node
+                                </span>
+                            </motion.div>
+                        )}
                     </motion.div>
                 </Link>
 
-                {/* Sign Out */}
                 <button
-                    onClick={handleSignOut}
+                    onClick={() => signOut()}
                     className={cn(
-                        "w-full flex items-center h-12 rounded-2xl transition-all duration-200 px-3 relative overflow-hidden group",
-                        "text-rose-400 opacity-60 hover:opacity-100 hover:bg-rose-500/10 cursor-pointer"
+                        "w-full flex items-center h-12 rounded-2xl transition-all duration-300 px-4 group/logout",
+                        "text-rose-400/40 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
                     )}
                 >
-                    <div
-                        className={cn("flex items-center justify-center group-hover:scale-110", isCollapsed ? "w-full" : "w-6")}
-                        style={{ transition: 'all 0.2s ease' }}
-                    >
-                        <LogOut size={20} />
-                    </div>
+                    <LogOut size={20} className="shrink-0 transition-transform group-hover/logout:-translate-x-1" />
                     {!isCollapsed && (
                         <motion.span
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="ml-3 font-medium"
+                            className="ml-4 text-[11px] font-black uppercase tracking-widest"
                         >
-                            Sign Out
+                            Node Exit
                         </motion.span>
                     )}
                 </button>

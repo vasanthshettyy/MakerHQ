@@ -1,117 +1,95 @@
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Search, Menu, ArrowUpRight } from 'lucide-react';
+import { Search, Menu, Command, LayoutGrid } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '../notifications/NotificationBell';
+import { PREMIUM_SPRING, MICRO_INTERACTION } from '../../lib/motion';
+import { cn } from '../../lib/utils';
 
 export default function Topbar({ onMenuClick }) {
     const { profile, role } = useAuth();
     const { isDark } = useTheme();
     const location = useLocation();
 
-    // Format path to title
     const pathParts = location.pathname.split('/').filter(Boolean);
     const pageTitle = pathParts.length > 1
         ? pathParts[1].charAt(0).toUpperCase() + pathParts[1].slice(1).replace('-', ' ')
-        : 'Dashboard';
+        : 'Overview';
 
     const displayName = role === 'brand'
-        ? profile?.company_name || 'Brand'
+        ? profile?.company_name || 'Brand Entity'
         : role === 'influencer'
-            ? profile?.full_name || 'Influencer'
-            : 'Admin';
-
-    const avatarUrl = role === 'brand'
-        ? profile?.logo_url
-        : profile?.avatar_url;
+            ? profile?.full_name || 'Creator Node'
+            : 'System Admin';
 
     return (
-        <header
-            style={{ backdropFilter: 'blur(10px)' }}
-            className={`relative z-[120] overflow-visible h-[80px] flex items-center justify-between px-8 transition-all duration-500 ease-apple border-white/20 !rounded-3xl shadow-xl border-[1px] ${isDark ? 'bg-black/20' : 'bg-white/40'
-                }`}
-        >
-            {/* Left: Mobile Menu & Breadcrumb */}
-            <div className="flex items-center gap-4">
+        <header className="relative z-[40] flex items-center justify-between gap-6 px-4 md:px-2">
+            {/* Left: Branding/Context */}
+            <div className="flex items-center gap-4 lg:hidden">
                 <motion.button
-                    whileTap={{ scale: 0.94 }}
-                    whileHover={{ scale: 1.08, rotate: -3 }}
+                    {...MICRO_INTERACTION}
                     onClick={onMenuClick}
-                    className="lg:hidden p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors text-text-muted cursor-pointer"
+                    className="p-3 rounded-2xl bg-surface-900 border border-white/10 text-text-muted shadow-xl"
                 >
-                    <Menu className="w-5 h-5" />
+                    <Menu size={20} />
                 </motion.button>
-                <div className="hidden sm:block">
-                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-0.5">Welcome back,</p>
-                    <h1 className="text-lg font-display font-bold text-text-primary tracking-tight group cursor-default">
-                        {pageTitle}
-                        <span className="inline-block w-1 h-1 bg-primary rounded-full ml-1 animate-pulse" />
-                    </h1>
-                </div>
             </div>
 
-            {/* Center: Search (Hidden on Mobile) */}
-            <div className="hidden md:flex flex-1 max-w-md px-8 relative group/search">
-                <div
-                    style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '12px',
-                        transition: 'all 0.2s ease'
-                    }}
-                    className="flex items-center gap-3 px-6 min-h-[44px] w-full group focus-within:shadow-[0_0_0_2px_rgba(124,58,237,0.4)] focus-within:border-transparent"
+            <div className="hidden lg:flex flex-col">
+                <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex items-center gap-2.5 mb-1.5"
                 >
-                    <Search className={`w-4 h-4 shrink-0 transition-transform duration-300 group-focus-within:scale-110 ${isDark ? 'text-text-muted' : 'text-text-dark-muted'}`} />
-                    <input
+                    <div className="p-1 rounded-md bg-primary/10 border border-primary/20">
+                        <LayoutGrid size={10} className="text-primary" />
+                    </div>
+                    <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.3em]">Network Workspace</span>
+                </motion.div>
+                <h1 className="text-2xl font-display font-black text-white tracking-tighter uppercase">{pageTitle}</h1>
+            </div>
+
+            {/* Center: Omni-Search */}
+            <div className="flex-1 max-w-2xl hidden md:block">
+                <div className="relative group">
+                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <Search size={16} className="text-text-dim group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <input 
                         type="text"
-                        placeholder="Search for influencers, gigs..."
-                        className="bg-transparent outline-none w-full text-sm placeholder:text-text-muted/60 font-medium"
+                        placeholder="Search collaborations, talent, or nodes..."
+                        className="w-full bg-surface-950/40 border border-white/5 rounded-2xl py-3.5 pl-12 pr-16 text-sm text-white placeholder:text-text-dim focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none backdrop-blur-xl shadow-inner"
                     />
-                </div>
-
-                {/* Search Suggestions Dropdown (Apple-style instant feedback) */}
-                <div className="absolute top-full left-8 right-8 mt-2 glass-card opacity-0 translate-y-2 pointer-events-none group-focus-within/search:opacity-100 group-focus-within/search:translate-y-0 group-focus-within/search:pointer-events-auto transition-all duration-300 z-50 p-2">
-                    <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest p-2 mb-1">Recommended Gigs</div>
-                    <div className="flex flex-col gap-1">
-                        {['Social Media Campaign', 'Product Photography', 'Short Film Production'].map((item) => (
-                            <button key={item} className="text-left px-3 min-h-[44px] text-xs hover:bg-white/5 rounded-lg transition-colors text-white/80 hover:text-white flex items-center justify-between group/item">
-                                {item}
-                                <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                            </button>
-                        ))}
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-text-dim uppercase tracking-tighter">
+                            <Command size={10} /> K
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Right: Notifications & Profile */}
-            <div className="flex items-center gap-6">
+            {/* Right: Global Actions */}
+            <div className="flex items-center gap-4 md:gap-6">
                 <NotificationBell />
+                
+                <div className="h-10 w-px bg-white/5 hidden md:block" />
 
-                <motion.div
-                    whileTap={{ scale: 0.96 }}
-                    whileHover={{ y: -2 }}
-                    className="flex items-center gap-4 group cursor-pointer transition-all duration-300"
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3.5 p-1 pr-5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group shadow-xl"
                 >
-                    <div className="text-right hidden md:block">
-                        <p className="text-sm font-bold text-text-primary tracking-tight group-hover:text-primary transition-colors">{displayName}</p>
-                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.1em]">
-                            {role}
-                        </p>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-white/5 relative overflow-hidden group-hover:scale-105 transition-transform">
+                        <span className="relative z-10 text-primary font-black text-xs">{displayName.charAt(0)}</span>
+                        <div className="absolute inset-0 bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <div className="relative">
-                        <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-brand transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-indigo-500/20">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-surface-900 border-2 border-surface-900">
-                                {avatarUrl ? (
-                                    <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-125" />
-                                ) : (
-                                    <span className="w-full h-full flex items-center justify-center text-white font-bold text-xs">
-                                        {displayName.charAt(0).toUpperCase()}
-                                    </span>
-                                )}
-                            </div>
+                    <div className="hidden sm:flex flex-col">
+                        <span className="text-xs font-black text-white truncate max-w-[120px] leading-none mb-1.5 uppercase tracking-wide">{displayName}</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
+                            <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Node Online</span>
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success border-2 border-surface-900 rounded-full shadow-sm" />
                     </div>
                 </motion.div>
             </div>

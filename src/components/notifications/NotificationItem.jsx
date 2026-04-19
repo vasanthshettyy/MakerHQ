@@ -1,5 +1,4 @@
 import React from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -7,7 +6,8 @@ import {
   XCircle, 
   RefreshCw, 
   Star, 
-  AlertCircle
+  AlertCircle,
+  ArrowUpRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { STAGGER_ITEM, MICRO_INTERACTION } from '../../lib/motion';
@@ -15,14 +15,11 @@ import { cn } from '../../lib/utils';
 
 const NotificationItem = ({ notification, onMarkRead }) => {
   const navigate = useNavigate();
+  
   const isSupportedLink = (link) => {
     if (!link || typeof link !== 'string') return false;
-    
-    // Explicitly allowed prefixes for roles
     const validPrefixes = ['/brand/', '/influencer/', '/admin/'];
     if (validPrefixes.some(prefix => link.startsWith(prefix))) return true;
-
-    // Explicitly allowed static routes
     const staticRoutes = ['/login', '/select-role', '/onboarding', '/profile'];
     return staticRoutes.includes(link);
   };
@@ -30,88 +27,91 @@ const NotificationItem = ({ notification, onMarkRead }) => {
   const getIcon = () => {
     switch (notification.type) {
       case 'proposal_received':
-        return <FileText className="w-4 h-4 text-blue-500" />;
+        return <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400"><FileText size={16} /></div>;
       case 'proposal_update':
         return notification.title.includes('Accepted') 
-          ? <CheckCircle2 className="w-4 h-4 text-green-500" />
-          : <XCircle className="w-4 h-4 text-red-500" />;
+          ? <div className="p-2 rounded-xl bg-success/20 text-success"><CheckCircle2 size={16} /></div>
+          : <div className="p-2 rounded-xl bg-error/20 text-error"><XCircle size={16} /></div>;
       case 'milestone_update':
-        if (notification.title.includes('Approved')) return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-        if (notification.title.includes('Revision')) return <RefreshCw className="w-4 h-4 text-orange-500" />;
-        return <FileText className="w-4 h-4 text-blue-500" />;
+        if (notification.title.includes('Approved')) return <div className="p-2 rounded-xl bg-success/20 text-success"><CheckCircle2 size={16} /></div>;
+        if (notification.title.includes('Revision')) return <div className="p-2 rounded-xl bg-warning/20 text-warning"><RefreshCw size={16} /></div>;
+        return <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400"><FileText size={16} /></div>;
       case 'contract_completed':
-        return <CheckCircle2 className="w-4 h-4 text-purple-500" />;
+        return <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400"><CheckCircle2 size={16} /></div>;
       case 'review_received':
-        return <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />;
+        return <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400"><Star size={16} fill="currentColor" /></div>;
       default:
-        return <AlertCircle className="w-4 h-4 text-muted-foreground" />;
+        return <div className="p-2 rounded-xl bg-white/5 text-text-muted"><AlertCircle size={16} /></div>;
     }
   };
 
   const handleClick = (e) => {
     e.preventDefault();
-    if (!notification.is_read) {
-      onMarkRead(notification.id);
-    }
-    if (isSupportedLink(notification.link)) {
-      navigate(notification.link);
-    }
+    if (!notification.is_read) onMarkRead(notification.id);
+    if (isSupportedLink(notification.link)) navigate(notification.link);
   };
 
   const timeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + "y ago";
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + "mo ago";
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + "d ago";
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + "h ago";
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + "m ago";
-    return Math.floor(seconds) + "s ago";
+    if (seconds < 60) return "Just now";
+    const intervals = {
+      y: 31536000,
+      mo: 2592000,
+      d: 86400,
+      h: 3600,
+      m: 60
+    };
+    for (let key in intervals) {
+      const count = Math.floor(seconds / intervals[key]);
+      if (count >= 1) return `${count}${key} ago`;
+    }
+    return "Recently";
   };
 
   return (
     <motion.div
       variants={STAGGER_ITEM}
-      {...MICRO_INTERACTION}
+      whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)', x: 4 }}
       className={cn(
-        "group relative flex gap-4 p-4 transition-colors hover:bg-muted/50 border-b last:border-0",
-        !notification.is_read && "bg-muted/30"
+        "group relative flex gap-4 p-4 rounded-2xl transition-all border border-transparent cursor-pointer",
+        !notification.is_read && "bg-white/[0.03] border-white/5 shadow-sm"
       )}
       onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick(e)}
     >
-      <div className="flex-shrink-0 mt-1">
-        <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border shadow-sm group-hover:shadow-md transition-shadow">
+      <div className="flex-shrink-0">
+        <div className="relative">
           {getIcon()}
+          {!notification.is_read && (
+            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-surface-950" />
+          )}
         </div>
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1 gap-2">
           <h4 className={cn(
-            "text-sm font-medium leading-none truncate",
-            !notification.is_read ? "text-foreground font-semibold" : "text-muted-foreground"
+            "text-sm font-bold tracking-tight truncate leading-none transition-colors",
+            !notification.is_read ? "text-white" : "text-text-secondary group-hover:text-white"
           )}>
             {notification.title}
           </h4>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+          <span className="text-[9px] font-black uppercase tracking-widest text-text-dim whitespace-nowrap bg-white/5 px-1.5 py-0.5 rounded-md">
             {timeAgo(notification.created_at)}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2 leading-tight">
+        <p className={cn(
+          "text-xs leading-relaxed line-clamp-2 transition-colors",
+          !notification.is_read ? "text-text-secondary" : "text-text-muted group-hover:text-text-secondary"
+        )}>
           {notification.message}
         </p>
+        
+        {isSupportedLink(notification.link) && (
+          <div className="mt-3 flex items-center gap-1.5 text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all uppercase tracking-[0.15em]">
+            Take Action <ArrowUpRight size={10} />
+          </div>
+        )}
       </div>
-
-      {!notification.is_read && (
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
-      )}
     </motion.div>
   );
 };

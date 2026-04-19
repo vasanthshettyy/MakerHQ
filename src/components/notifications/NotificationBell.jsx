@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell } from 'lucide-react';
+import { Bell, Sparkles } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useTheme } from '../../context/ThemeContext';
 import NotificationDropdown from './NotificationDropdown';
-import { MICRO_INTERACTION } from '../../lib/motion';
+import { MICRO_INTERACTION, PREMIUM_SPRING } from '../../lib/motion';
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,25 +12,29 @@ const NotificationBell = () => {
   const { isDark } = useTheme();
 
   return (
-    <div className="relative z-[130]">
+    <div className="relative z-[100]">
       <motion.button
-        whileTap={{ scale: 0.94 }}
-        whileHover={{ scale: 1.08, rotate: -3 }}
+        {...MICRO_INTERACTION}
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2.5 rounded-full transition-all duration-300 cursor-pointer group ${
-          isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'
+        className={`relative p-3 rounded-2xl transition-all duration-300 cursor-pointer group ${
+          isOpen ? 'bg-primary/20 text-primary' : 'bg-white/5 text-text-muted hover:bg-white/10 hover:text-text-secondary'
         }`}
         aria-label="Notifications"
       >
-        <Bell className="w-5 h-5 text-text-secondary transition-all duration-300 group-hover:scale-110 group-hover:brightness-110" />
+        <Bell size={20} strokeWidth={isOpen ? 2.5 : 2} className="transition-all" />
+        
         <AnimatePresence>
           {unreadCount > 0 && (
-            <motion.span
+            <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              className="absolute top-2.5 right-2.5 w-2 h-2 bg-accent rounded-full animate-pulse shadow-[0_0_12px_rgba(225,29,72,0.6)]"
-            />
+              className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center border-2 border-surface-950 shadow-lg shadow-primary/40"
+            >
+              <span className="text-[9px] font-black text-white leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
