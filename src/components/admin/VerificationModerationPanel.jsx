@@ -7,14 +7,16 @@ import {
   User, 
   Calendar,
   AlertCircle,
-  Clock
+  Clock,
+  ShieldCheck,
+  Zap,
+  Info,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MICRO_INTERACTION, PREMIUM_SPRING, STAGGER_CONTAINER, STAGGER_ITEM } from '../../lib/motion';
 
-/**
- * VerificationModerationPanel
- * Component for Admins to review pending influencer verification proofs.
- */
 const VerificationModerationPanel = ({ pendingProofs = [], onReview }) => {
   const [processingId, setProcessingId] = useState(null);
   const [rejectionId, setRejectionId] = useState(null);
@@ -27,7 +29,7 @@ const VerificationModerationPanel = ({ pendingProofs = [], onReview }) => {
     try {
       await onReview(proofId, 'Approved', null);
     } catch (err) {
-      setError(err.message || 'Failed to approve submission.');
+      setError(err.message || 'Validation sequence failed.');
     } finally {
       setProcessingId(null);
     }
@@ -35,7 +37,7 @@ const VerificationModerationPanel = ({ pendingProofs = [], onReview }) => {
 
   const handleReject = async (proofId) => {
     if (!adminNotes.trim()) {
-      setError('A reason for rejection is required to help the influencer fix their submission.');
+      setError('Directive notes required for failed validation.');
       return;
     }
     
@@ -46,105 +48,100 @@ const VerificationModerationPanel = ({ pendingProofs = [], onReview }) => {
       setRejectionId(null);
       setAdminNotes('');
     } catch (err) {
-      setError(err.message || 'Failed to reject submission.');
+      setError(err.message || 'Rejection protocol failed.');
     } finally {
       setProcessingId(null);
     }
   };
 
-  // Empty State
-  if (pendingProofs.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 bg-zinc-900/30 border border-dashed border-white/10 rounded-2xl text-center space-y-4">
-        <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-500">
-          <CheckCircle size={32} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-white tracking-tight">All Caught Up!</h3>
-          <p className="text-sm text-zinc-500">No pending verification proofs to review at the moment.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <motion.div 
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+    >
       {pendingProofs.map((proof) => (
-        <div 
+        <motion.div 
           key={proof.id} 
-          className="group flex flex-col bg-zinc-900/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md transition-all hover:border-white/20"
+          variants={STAGGER_ITEM}
+          className="group flex flex-col glass-card !rounded-[2.5rem] border-white/5 bg-surface-900/40 relative overflow-hidden"
         >
-          {/* Header Card Section */}
-          <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-zinc-800 border border-white/5 text-zinc-400">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          {/* Header */}
+          <div className="p-6 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-surface-950 border border-white/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-105 transition-transform">
                 <User size={20} />
               </div>
-              <div>
-                <h4 className="font-bold text-white leading-tight">
-                  {proof.profiles_influencer?.full_name || 'Unnamed Influencer'}
+              <div className="min-w-0">
+                <h4 className="font-bold text-white tracking-tight truncate leading-none mb-1.5">
+                  {proof.profiles_influencer?.full_name || 'Node Identity'}
                 </h4>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2">
                   <span className={cn(
-                    "text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                    proof.platform === 'instagram' ? "bg-primary/20 text-primary" : "bg-rose-500/20 text-rose-500"
+                    "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border",
+                    proof.platform?.toLowerCase() === 'instagram' ? "bg-rose-500/10 border-rose-500/20 text-rose-400" : "bg-red-500/10 border-red-500/20 text-red-400"
                   )}>
                     {proof.platform}
                   </span>
-                  <span className="text-[10px] text-zinc-600 font-bold">•</span>
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Analytics Proof</span>
+                  <div className="w-1 h-1 rounded-full bg-white/10" />
+                  <span className="text-[9px] text-text-dim font-bold uppercase tracking-wider">Analytics Evidence</span>
                 </div>
               </div>
             </div>
             
-            <a 
+            <motion.a 
+              {...MICRO_INTERACTION}
               href={proof.proof_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-primary hover:text-white transition-all bg-primary/10 hover:bg-primary px-3 py-2 rounded-lg border border-primary/20"
+              className="flex items-center gap-2 text-[9px] font-black tracking-widest text-primary bg-primary/10 hover:bg-primary hover:text-white px-4 py-2 rounded-xl border border-primary/20 transition-all shadow-lg shadow-primary/5"
             >
-              <ExternalLink size={14} />
-              VIEW PROOF
-            </a>
+              INSPECT
+              <ExternalLink size={12} />
+            </motion.a>
           </div>
 
-          {/* Action and Context Section */}
-          <div className="p-5 flex-1 flex flex-col justify-between space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                <Clock size={14} />
-                Submitted {new Date(proof.submitted_at).toLocaleDateString()}
+          {/* Body */}
+          <div className="p-6 flex-1 flex flex-col justify-between space-y-8">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2 text-[10px] text-text-dim font-black uppercase tracking-widest">
+                <Clock size={12} />
+                Initialized {new Date(proof.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
               </div>
-              <div className="text-[10px] text-zinc-600 font-mono">
-                ID: {proof.id.split('-')[0]}
+              <div className="text-[8px] text-text-muted font-mono uppercase">
+                NODE_SEC: {proof.id.split('-')[0]}
               </div>
             </div>
 
             {rejectionId === proof.id ? (
-              /* Rejection Feedback Flow */
-              <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-white/5">
                 <div className="flex items-center gap-2 text-rose-400">
                   <AlertCircle size={14} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Reason for Rejection</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Correction Directive</span>
                 </div>
-                <textarea
-                  className="w-full bg-zinc-950 border border-rose-500/30 rounded-xl p-3 text-sm text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all resize-none"
-                  rows={3}
-                  placeholder="e.g., Screenshot is missing follower count, blurry, or incorrect platform..."
-                  value={adminNotes}
-                  onChange={(e) => {
-                    setAdminNotes(e.target.value);
-                    if (error) setError(null);
-                  }}
-                  autoFocus
-                />
-                <div className="flex gap-2">
+                <div className="relative">
+                    <textarea
+                        className="w-full bg-surface-950/50 border border-rose-500/20 rounded-[1.5rem] p-4 text-sm text-white placeholder:text-text-dim outline-none focus:border-rose-500 transition-all resize-none leading-relaxed font-medium"
+                        rows={3}
+                        placeholder="Provide details on submission failure..."
+                        value={adminNotes}
+                        onChange={(e) => {
+                            setAdminNotes(e.target.value);
+                            if (error) setError(null);
+                        }}
+                        autoFocus
+                    />
+                </div>
+                <div className="flex gap-3">
                   <button
                     onClick={() => handleReject(proof.id)}
                     disabled={processingId === proof.id}
-                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 rounded-lg transition-all shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2"
+                    className="flex-[2] bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-[0.2em] py-3.5 rounded-xl transition-all shadow-xl shadow-rose-900/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
-                    {processingId === proof.id ? <Loader2 size={14} className="animate-spin" /> : 'CONFIRM REJECTION'}
+                    {processingId === proof.id ? <Loader2 size={16} className="animate-spin" /> : 'Confirm Failure'}
                   </button>
                   <button
                     onClick={() => {
@@ -152,42 +149,39 @@ const VerificationModerationPanel = ({ pendingProofs = [], onReview }) => {
                       setAdminNotes('');
                       setError(null);
                     }}
-                    className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs font-bold py-2.5 rounded-lg transition-all"
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-text-muted text-[10px] font-black uppercase tracking-[0.2em] py-3.5 rounded-xl transition-all cursor-pointer"
                   >
-                    CANCEL
+                    Abort
                   </button>
                 </div>
-                {error && <p className="text-[10px] text-rose-500 font-bold italic">{error}</p>}
-              </div>
+                {error && <p className="text-[10px] text-rose-400 font-bold italic ml-1 flex items-center gap-1.5"><AlertCircle size={10} /> {error}</p>}
+              </motion.div>
             ) : (
-              /* Main Action Buttons */
-              <div className="flex gap-3">
-                <button
+              <div className="flex gap-4 pt-4 border-t border-white/5">
+                <motion.button
+                  {...MICRO_INTERACTION}
                   onClick={() => handleApprove(proof.id)}
                   disabled={processingId === proof.id}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
-                  {processingId === proof.id ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <CheckCircle size={16} />
-                  )}
-                  APPROVE
-                </button>
-                <button
+                  {processingId === proof.id ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} strokeWidth={3} />}
+                  VALIDATE
+                </motion.button>
+                <motion.button
+                  {...MICRO_INTERACTION}
                   onClick={() => setRejectionId(proof.id)}
                   disabled={processingId === proof.id}
-                  className="flex-1 bg-zinc-800 hover:bg-rose-600 text-zinc-400 hover:text-white text-xs font-bold py-3 rounded-xl transition-all border border-white/5 flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="flex-1 bg-white/5 hover:bg-rose-500/10 border border-white/10 text-text-dim hover:text-rose-400 hover:border-rose-500/20 text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   <XCircle size={16} />
                   REJECT
-                </button>
+                </motion.button>
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

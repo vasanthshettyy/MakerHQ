@@ -2,13 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import PageWrapper from '../../components/layout/PageWrapper';
 import UserModerationTable from '../../components/admin/UserModerationTable';
-import { Users, Loader2 } from 'lucide-react';
+import { Users, Loader2, ShieldCheck, Database, Search, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../lib/utils';
 
-/**
- * UserManagementPage (Admin)
- * Enhanced for MVP: User activation/ban toggles with feedback.
- */
 export default function UserManagementPage() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,51 +45,65 @@ export default function UserManagementPage() {
             setUsers(prev => prev.map(u => 
                 u.user_id === userId ? { ...u, is_active: newStatus } : u
             ));
-            setMessage({ type: 'success', text: `User ${newStatus ? 'activated' : 'deactivated'} successfully.` });
+            setMessage({ type: 'success', text: `Node ${newStatus ? 'activated' : 'deactivated'} successfully.` });
         } catch (err) {
             console.error('Error updating user status:', err);
-            setMessage({ type: 'error', text: 'Failed to update user status.' });
+            setMessage({ type: 'error', text: 'Failed to update node status.' });
         } finally {
             setTimeout(() => setMessage(null), 3000);
         }
     }
 
     return (
-        <PageWrapper title="User Management" subtitle="Manage and moderate platform participants.">
-            <div className="space-y-6">
+        <PageWrapper title="Entity Directory" subtitle="Manage and moderate platform participants across all nodes.">
+            <div className="space-y-8 pb-20">
                 <AnimatePresence>
                     {message && (
                         <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className={`fixed top-24 right-8 z-[200] px-6 py-3 rounded-xl shadow-2xl border backdrop-blur-md flex items-center gap-3 ${
+                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            className={`fixed top-24 right-8 z-[200] px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl flex items-center gap-3 ${
                                 message.type === 'success' 
                                     ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
                                     : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                             }`}
                         >
-                            <div className={`w-2 h-2 rounded-full ${message.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <p className="text-sm font-bold tracking-tight">{message.text}</p>
+                            <div className={cn(
+                                "w-2 h-2 rounded-full",
+                                message.type === 'success' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'
+                            )} />
+                            <p className="text-[10px] font-black uppercase tracking-widest leading-none">{message.text}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20">
-                        <Users size={24} />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-glow">
+                            <Users size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-display font-black text-white tracking-tight leading-none mb-1 uppercase">Platform Nodes</h2>
+                            <p className="text-[10px] font-black text-text-dim uppercase tracking-[0.25em]">Total Registered Entities: {users.length}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-white">Platform Users</h2>
-                        <p className="text-sm text-text-muted">Total registered accounts: {users.length}</p>
+
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/5 border border-white/5">
+                            <Database size={14} className="text-primary" />
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">Sync Status: Active</span>
+                        </div>
                     </div>
                 </div>
 
-                <UserModerationTable 
-                    users={users} 
-                    onToggleStatus={toggleUserStatus} 
-                    isLoading={loading} 
-                />
+                <div className="glass-card !rounded-[2.5rem] bg-surface-900/20 border-white/5 p-1">
+                    <UserModerationTable 
+                        users={users} 
+                        onToggleStatus={toggleUserStatus} 
+                        isLoading={loading} 
+                    />
+                </div>
             </div>
         </PageWrapper>
     );

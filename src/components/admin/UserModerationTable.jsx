@@ -7,15 +7,20 @@ import {
   User, 
   Mail, 
   Calendar,
-  MoreVertical
+  MoreVertical,
+  Zap,
+  Building2,
+  Users,
+  Target
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MICRO_INTERACTION, PREMIUM_SPRING } from '../../lib/motion';
 
 const UserModerationTable = ({ users = [], onToggleStatus, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [processingId, setProcessingId] = useState(null);
 
-  // Client-side filtering
   const filteredUsers = useMemo(() => {
     return users.filter(user => 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -34,137 +39,143 @@ const UserModerationTable = ({ users = [], onToggleStatus, isLoading }) => {
   const RoleBadge = ({ role }) => {
     const isBrand = role === 'brand';
     return (
-      <span className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border transition-colors",
+      <div className={cn(
+        "inline-flex items-center gap-2 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] border transition-all shadow-sm",
         isBrand 
           ? "bg-primary/10 border-primary/20 text-primary" 
-          : "bg-teal-500/10 border-teal-500/20 text-teal-400"
+          : "bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-400"
       )}>
-        {role.toUpperCase()}
-      </span>
+        {isBrand ? <Building2 size={10} /> : <Users size={10} />}
+        {role}
+      </div>
     );
   };
 
   return (
-    <div className="space-y-4">
-      {/* Search Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+    <div className="space-y-6">
+      {/* Refined Search Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white/[0.01]">
+        <div className="relative flex-1 max-w-md group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim group-focus-within:text-primary transition-colors" size={16} />
           <input
             type="text"
-            placeholder="Search users by email..."
+            placeholder="Search nodes by identity hash or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-zinc-950 border border-white/5 rounded-lg text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+            className="w-full pl-11 pr-4 py-3.5 bg-surface-950/50 border border-white/5 rounded-2xl text-sm text-white placeholder:text-text-dim outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all backdrop-blur-md"
           />
         </div>
-        <div className="text-xs text-zinc-500 font-medium">
-          Showing {filteredUsers.length} of {users.length} users
+        <div className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+          Scan Results: {filteredUsers.length} Nodes Identified
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-zinc-900/30 backdrop-blur-md">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/10 bg-white/5">
-              <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">User</th>
-              <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">Joined</th>
-              <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {isLoading ? (
-              [...Array(5)].map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  <td colSpan={5} className="px-6 py-8">
-                    <div className="h-4 bg-zinc-800 rounded w-full"></div>
-                  </td>
+      {/* Modern Data Table */}
+      <div className="data-table-container !rounded-none !border-0 !shadow-none bg-transparent">
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse data-table">
+            <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5">
+                <th className="px-8 py-5">Node Identity</th>
+                <th className="px-8 py-5">Protocol Role</th>
+                <th className="px-8 py-5">Initialization Date</th>
+                <th className="px-8 py-5">Status</th>
+                <th className="px-8 py-5 text-right">Intervention</th>
                 </tr>
-              ))
-            ) : filteredUsers.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500 italic">
-                  No users found matching your search.
-                </td>
-              </tr>
-            ) : (
-              filteredUsers.map((user) => (
-                <tr 
-                  key={user.user_id} 
-                  className={cn(
-                    "group transition-colors hover:bg-white/5",
-                    !user.is_active && "opacity-60 bg-rose-500/[0.02]"
-                  )}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700 transition-colors">
-                        <User size={16} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-white truncate max-w-[200px]">
-                          {user.email}
-                        </span>
-                        <span className="text-[10px] text-zinc-500 font-mono">
-                          {user.user_id.split('-')[0]}...
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <RoleBadge role={user.role} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-zinc-400 text-sm">
-                      <Calendar size={14} />
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        user.is_active ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-                      )} />
-                      <span className={cn(
-                        "text-xs font-medium",
-                        user.is_active ? "text-emerald-400" : "text-rose-400"
-                      )}>
-                        {user.is_active ? 'Active' : 'Banned'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => handleToggle(user.user_id, !user.is_active)}
-                      disabled={processingId === user.user_id}
-                      className={cn(
-                        "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all transform active:scale-95",
-                        user.is_active 
-                          ? "bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white" 
-                          : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white",
-                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      )}
+            </thead>
+            <tbody className="divide-y divide-white/5">
+                {isLoading ? (
+                [...Array(6)].map((_, i) => (
+                    <tr key={i} className="animate-pulse opacity-40">
+                        <td colSpan={5} className="px-8 py-10">
+                            <div className="h-4 bg-white/5 rounded-full w-full" />
+                        </td>
+                    </tr>
+                ))
+                ) : filteredUsers.length === 0 ? (
+                <tr>
+                    <td colSpan={5} className="px-8 py-32 text-center">
+                        <div className="flex flex-col items-center gap-4 opacity-20">
+                            <Target size={48} strokeWidth={1} />
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em]">Zero Signals Identified</p>
+                        </div>
+                    </td>
+                </tr>
+                ) : (
+                filteredUsers.map((user) => (
+                    <tr 
+                    key={user.user_id} 
+                    className={cn(
+                        "group transition-all hover:bg-white/[0.02]",
+                        !user.is_active && "opacity-60 bg-rose-500/[0.02]"
+                    )}
                     >
-                      {processingId === user.user_id ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : user.is_active ? (
-                        <ShieldOff size={14} />
-                      ) : (
-                        <Shield size={14} />
-                      )}
-                      {user.is_active ? 'BAN' : 'UNBAN'}
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-2xl bg-surface-900 border border-white/5 text-text-dim group-hover:text-primary group-hover:border-primary/20 transition-all shadow-inner">
+                            <User size={18} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-bold text-white group-hover:text-primary transition-colors truncate">
+                                {user.email}
+                            </span>
+                            <span className="text-[9px] text-text-dim font-black uppercase tracking-widest mt-0.5">
+                                Node ID: {user.user_id.split('-')[0]}...{user.user_id.slice(-4)}
+                            </span>
+                        </div>
+                        </div>
+                    </td>
+                    <td className="px-8 py-6">
+                        <RoleBadge role={user.role} />
+                    </td>
+                    <td className="px-8 py-6">
+                        <div className="flex items-center gap-2 text-text-secondary text-xs font-medium">
+                        <Calendar size={14} className="text-text-dim" />
+                        {new Date(user.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </div>
+                    </td>
+                    <td className="px-8 py-6">
+                        <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            user.is_active ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" : "bg-rose-500"
+                        )} />
+                        <span className={cn(
+                            "text-[10px] font-black uppercase tracking-widest",
+                            user.is_active ? "text-emerald-400" : "text-rose-400"
+                        )}>
+                            {user.is_active ? 'Active Node' : 'Banned Node'}
+                        </span>
+                        </div>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                        <motion.button
+                        {...MICRO_INTERACTION}
+                        onClick={() => handleToggle(user.user_id, !user.is_active)}
+                        disabled={processingId === user.user_id}
+                        className={cn(
+                            "inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg disabled:opacity-50",
+                            user.is_active 
+                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white" 
+                            : "bg-emerald-500 text-black shadow-emerald-500/20"
+                        )}
+                        >
+                        {processingId === user.user_id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                        ) : user.is_active ? (
+                            <ShieldOff size={14} />
+                        ) : (
+                            <Shield size={14} />
+                        )}
+                        {user.is_active ? 'Deactivate' : 'Reactivate'}
+                        </motion.button>
+                    </td>
+                    </tr>
+                ))
+                )}
+            </tbody>
+            </table>
+        </div>
       </div>
     </div>
   );
