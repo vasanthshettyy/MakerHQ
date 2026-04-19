@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useContracts } from '../../hooks/useContracts';
 import PageWrapper from '../../components/layout/PageWrapper';
 import ContractCard from '../../components/contracts/ContractCard';
-import { FileText } from 'lucide-react';
+import { FileText, Inbox, Sparkles, Workflow } from 'lucide-react';
+import { STAGGER_CONTAINER, STAGGER_ITEM, PREMIUM_SPRING } from '../../lib/motion';
 
 export default function InfluencerContractsPage() {
     const { contractId } = useParams();
@@ -19,34 +21,48 @@ export default function InfluencerContractsPage() {
     }, [loading, contractId]);
 
     return (
-        <PageWrapper title="My Contracts" subtitle="Track active campaigns and milestones">
+        <PageWrapper title="Execution Matrix" subtitle="Monitor active campaign nodes and deployment milestones.">
             {loading ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {[...Array(2)].map((_, i) => (
-                        <div key={i} className="glass-card p-5 animate-pulse">
-                            <div className="h-5 bg-white/10 rounded w-1/2 mb-3" />
-                            <div className="h-3 bg-white/10 rounded w-3/4" />
-                        </div>
+                        <div key={i} className="glass-card !rounded-[2rem] h-40 animate-pulse bg-white/[0.02] border-white/5" />
                     ))}
                 </div>
             ) : contracts.length === 0 ? (
-                <div className="glass-card p-12 text-center">
-                    <FileText className="w-12 h-12 text-text-muted mx-auto mb-3" />
-                    <h3 className="font-semibold mb-1">No contracts yet</h3>
-                    <p className="text-sm text-text-secondary">When a brand accepts your proposal, your contract will appear here</p>
-                </div>
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="glass-card !rounded-[3rem] p-24 text-center border-dashed border-white/10 bg-white/[0.01]"
+                >
+                    <div className="relative w-20 h-20 mx-auto mb-8">
+                        <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full" />
+                        <div className="w-20 h-20 rounded-3xl bg-surface-900 border border-white/5 flex items-center justify-center text-text-dim relative z-10">
+                            <Workflow size={32} strokeWidth={1} />
+                        </div>
+                    </div>
+                    <h3 className="text-2xl font-display font-black text-white mb-3 tracking-tight">Zero Active Flows</h3>
+                    <p className="text-sm text-text-muted max-w-sm mx-auto leading-relaxed">
+                        No active contract frameworks identified. When a brand accept your proposal, your execution nodes will appear here.
+                    </p>
+                </motion.div>
             ) : (
-                <div className="space-y-4">
+                <motion.div 
+                    variants={STAGGER_CONTAINER}
+                    initial="hidden"
+                    animate="show"
+                    className="space-y-6"
+                >
                     {contracts.map(contract => (
-                        <ContractCard
-                            key={contract.id}
-                            contract={contract}
-                            onSubmitMilestone={submitMilestone}
-                            isBrand={false}
-                            highlight={contract.id === contractId}
-                        />
+                        <motion.div key={contract.id} variants={STAGGER_ITEM}>
+                            <ContractCard
+                                contract={contract}
+                                onSubmitMilestone={submitMilestone}
+                                isBrand={false}
+                                highlight={contract.id === contractId}
+                            />
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             )}
         </PageWrapper>
     );

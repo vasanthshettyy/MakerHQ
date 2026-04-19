@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, FileText, Clock, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, FileText, Clock, MessageSquare, ChevronDown, ChevronUp, ExternalLink, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useReviews } from '../../hooks/useReviews';
 import { formatINR, formatRelativeTime, cn } from '../../lib/utils';
 import { STATUS_COLORS } from '../../lib/constants';
+import { MICRO_INTERACTION, PREMIUM_SPRING } from '../../lib/motion';
 import ReviewFormModal from '../reviews/ReviewFormModal';
 import ReviewPromptBanner from '../reviews/ReviewPromptBanner';
 import MilestoneWorkflow from './MilestoneWorkflow';
@@ -54,77 +55,94 @@ export default function ContractCard({
     const targetId = isBrand ? contract.influencer_id : contract.brand_id;
 
     return (
-        <div
+        <motion.div
             id={contract.id}
-            onClick={() => setIsExpanded(!isExpanded)}
+            layout
             className={cn(
-                "glass-card p-5 mb-4 cursor-pointer hover:border-white/20 transition-all select-none overflow-hidden",
-                highlight && "border-primary shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                "glass-card !rounded-[2rem] p-6 mb-4 cursor-pointer hover:border-white/10 transition-all select-none overflow-hidden relative group/contract bg-white/[0.01]",
+                highlight && "border-primary/50 shadow-[0_0_40px_rgba(99,102,241,0.15)] bg-primary/[0.02]"
             )}
         >
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-indigo-500/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover/contract:opacity-100 transition-opacity" />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10" onClick={() => setIsExpanded(!isExpanded)}>
+                <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-surface-900 border border-white/5 p-0.5 overflow-hidden shadow-xl group-hover/contract:scale-105 transition-transform shrink-0">
                         {partnerAvatar ? (
                             <img src={partnerAvatar} alt="" className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-white text-sm font-bold">{partnerName?.charAt(0)}</span>
+                            <div className="w-full h-full flex items-center justify-center text-white/10 font-black text-lg bg-white/5">
+                                {partnerName?.charAt(0)}
+                            </div>
                         )}
                     </div>
                     <div>
-                        <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                            <FileText size={14} className="text-primary" />
+                        <h3 className="font-display font-black text-base text-white flex items-center gap-2 group-hover/contract:text-primary transition-colors leading-tight">
+                            <FileText size={16} className="text-primary/70" />
                             {isBrand ? partnerName : contract.gigs?.title}
                         </h3>
-                        <div className="flex items-center gap-3 text-[10px] text-text-muted mt-0.5 uppercase tracking-widest font-bold">
-                            {isBrand ? (
-                                <span className="text-primary">{formatINR(contract.agreed_price)}</span>
-                            ) : (
-                                <span>with {partnerName}</span>
-                            )}
-                            <span>•</span>
-                            <span className="flex items-center gap-1"><Clock size={10} />{formatRelativeTime(contract.created_at)}</span>
+                        <div className="flex items-center gap-3 mt-1.5">
+                            <div className="flex items-center gap-1.5 text-[10px] font-black text-text-dim uppercase tracking-widest">
+                                {isBrand ? (
+                                    <span className="text-primary">{formatINR(contract.agreed_price)}</span>
+                                ) : (
+                                    <span className="text-white">with {partnerName}</span>
+                                )}
+                                <div className="w-1 h-1 rounded-full bg-white/10" />
+                                <span className="flex items-center gap-1"><Clock size={10} />{formatRelativeTime(contract.created_at)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    {contract.status !== 'Pending' && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(isBrand ? '/brand/messages' : '/influencer/messages');
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/20 transition-all cursor-pointer"
-                        >
-                            <MessageSquare size={12} />
-                            Message
-                        </button>
-                    )}
-                    {reviewAllowed && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowReviewModal(true);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] font-bold uppercase tracking-wider hover:bg-yellow-500/20 transition-all cursor-pointer"
-                        >
-                            <Star size={12} fill="currentColor" />
-                            Review
-                        </button>
-                    )}
-                    <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold uppercase tracking-wider ${STATUS_COLORS[contract.status]}`}>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        {contract.status !== 'Pending' && (
+                            <motion.button
+                                {...MICRO_INTERACTION}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(isBrand ? '/brand/messages' : '/influencer/messages');
+                                }}
+                                className="p-2.5 rounded-xl bg-white/5 text-text-muted hover:text-primary hover:bg-primary/10 transition-all border border-white/5"
+                            >
+                                <MessageSquare size={16} />
+                            </motion.button>
+                        )}
+                        {reviewAllowed && (
+                            <motion.button
+                                {...MICRO_INTERACTION}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowReviewModal(true);
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500/20 transition-all"
+                            >
+                                <Star size={12} fill="currentColor" />
+                                Review
+                            </motion.button>
+                        )}
+                    </div>
+                    
+                    <div className={cn(
+                        "px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest",
+                        STATUS_COLORS[contract.status]
+                    )}>
                         {contract.status}
-                    </span>
-                    <div className="ml-2 p-1 rounded-full bg-white/5 text-zinc-400">
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+
+                    <div className={cn(
+                        "w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-text-dim transition-all",
+                        isExpanded ? "bg-primary/20 text-primary border-primary/20 rotate-180" : "group-hover/contract:bg-white/10 group-hover/contract:text-white"
+                    )}>
+                        <ChevronDown size={20} />
                     </div>
                 </div>
             </div>
 
             {/* Review Prompt Banner */}
             {contract.status === 'Completed' && reviewAllowed && (
-                <div className="mb-6 pt-2" onClick={(e) => e.stopPropagation()}>
+                <div className="mt-6 pt-2" onClick={(e) => e.stopPropagation()}>
                     <ReviewPromptBanner
                         onReviewClick={() => setShowReviewModal(true)}
                         partnerName={partnerName}
@@ -133,16 +151,16 @@ export default function ContractCard({
                 </div>
             )}
 
-            {/* Milestones */}
-            <AnimatePresence initial={false}>
-                {isExpanded && contract.contract_milestones?.length >= 0 && (
+            {/* Milestones Flow */}
+            <AnimatePresence>
+                {isExpanded && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        transition={PREMIUM_SPRING}
                         onClick={(e) => e.stopPropagation()}
-                        className="mt-6 border-t border-white/5 pt-6 cursor-default overflow-hidden"
+                        className="mt-10 pt-10 border-t border-white/5 cursor-default overflow-hidden relative"
                     >
                         <MilestoneWorkflow
                             contractId={contract.id}
@@ -167,6 +185,6 @@ export default function ContractCard({
                 targetName={partnerName}
                 onSuccess={() => setReviewAllowed(false)}
             />
-        </div>
+        </motion.div>
     );
 }

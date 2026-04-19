@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -7,49 +7,29 @@ import {
   Clock, 
   Send, 
   Search, 
-  MessageSquare 
+  MessageSquare,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { PREMIUM_SPRING, MICRO_INTERACTION } from '../../lib/motion';
 import MilestoneSubmitForm from './MilestoneSubmitForm';
 import MilestoneReviewPanel from './MilestoneReviewPanel';
 
-/**
- * Helper to render status badges based on milestone status
- */
 const StatusBadge = ({ status }) => {
   const configs = {
-    'Pending': {
-      bg: 'bg-zinc-800/50 border-zinc-700 text-zinc-400',
-      icon: <Clock size={14} className="mr-1.5" />,
-      label: 'Pending'
-    },
-    'Submitted': {
-      bg: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-      icon: <Send size={14} className="mr-1.5" />,
-      label: 'Submitted'
-    },
-    'In_Review': {
-      bg: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-      icon: <Search size={14} className="mr-1.5" />,
-      label: 'In Review'
-    },
-    'Approved': {
-      bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-      icon: <CheckCircle size={14} className="mr-1.5" />,
-      label: 'Approved'
-    },
-    'Revision_Requested': {
-      bg: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
-      icon: <AlertCircle size={14} className="mr-1.5" />,
-      label: 'Revision Requested'
-    }
+    'Pending': { bg: 'bg-white/5 border-white/5 text-text-muted', icon: <Clock size={12} />, label: 'Pending' },
+    'Submitted': { bg: 'bg-blue-500/10 border-blue-500/20 text-blue-400', icon: <Send size={12} />, label: 'Submitted' },
+    'In_Review': { bg: 'bg-amber-500/10 border-amber-500/20 text-amber-400', icon: <Search size={12} />, label: 'Reviewing' },
+    'Approved': { bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', icon: <CheckCircle size={12} />, label: 'Verified' },
+    'Revision_Requested': { bg: 'bg-rose-500/10 border-rose-500/20 text-rose-400', icon: <AlertCircle size={12} />, label: 'Correction Required' }
   };
 
   const config = configs[status] || configs['Pending'];
 
   return (
     <div className={cn(
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors",
+      "inline-flex items-center gap-2 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] border transition-all shadow-sm",
       config.bg
     )}>
       {config.icon}
@@ -68,116 +48,125 @@ const MilestoneCard = ({ milestone, isBrand, isLocked, onSubmit, onApprove, onRe
     brand_feedback 
   } = milestone;
 
-  // Determine if action button should be shown
   const isInfluencer = !isBrand;
   const showInfluencerAction = isInfluencer && !isLocked && (status === 'Pending' || status === 'Revision_Requested');
   const showBrandAction = isBrand && (status === 'Submitted' || status === 'In_Review');
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative group overflow-hidden rounded-xl border border-white/10 bg-zinc-900/40 backdrop-blur-md p-5 shadow-xl transition-all hover:border-white/20"
-    >
-      {/* Background Glow Effect */}
-      <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-all group-hover:bg-primary/10" />
-
-      <div className="flex flex-col gap-4">
+    <div className={cn(
+      "glass-card !rounded-[2rem] border-white/5 p-6 transition-all relative overflow-hidden",
+      isLocked ? "opacity-40 grayscale" : "bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
+    )}>
+      <div className="flex flex-col gap-6 relative z-10">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <h4 className="text-lg font-semibold text-white tracking-tight">
-              {milestone_name}
-            </h4>
-            <StatusBadge status={status} />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+             <div className={cn(
+                 "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                 status === 'Approved' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" : "bg-white/5 border-white/5 text-text-muted"
+             )}>
+                 {status === 'Approved' ? <CheckCircle size={18} /> : <Zap size={18} />}
+             </div>
+             <div className="min-w-0">
+                <h4 className="text-sm font-bold text-white tracking-tight truncate leading-none mb-2">
+                  {milestone_name}
+                </h4>
+                <StatusBadge status={status} />
+             </div>
           </div>
           
           {(showInfluencerAction || showBrandAction) && (
-            <button
+            <motion.button
+              {...MICRO_INTERACTION}
               onClick={() => setShowForm(!showForm)}
               disabled={isLocked}
               className={cn(
-                "px-4 py-2 rounded-lg bg-primary/90 hover:bg-primary text-white text-sm font-medium transition-all transform active:scale-95 shadow-lg shadow-primary/20",
-                isLocked && "opacity-50 cursor-not-allowed"
+                "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg cursor-pointer flex items-center gap-2",
+                showForm ? "bg-white/5 text-white border border-white/10" : "bg-primary text-white shadow-primary/20"
               )}
             >
-              {showForm ? 'Cancel' : (isBrand ? 'Review Work' : 'Submit Work')}
-            </button>
+              {showForm ? 'Cancel Operation' : (isBrand ? 'Execute Review' : 'Initialize Submission')}
+              {!showForm && <ArrowRight size={12} strokeWidth={3} />}
+            </motion.button>
           )}
         </div>
 
-        {/* Content Section */}
-        <div className="space-y-4">
-          {/* Submission Details */}
-          {submission_link && (
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Submission Link</label>
-              <a 
-                href={submission_link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors w-fit group/link"
-              >
-                <span className="truncate max-w-[200px] sm:max-w-md">{submission_link}</span>
-                <ExternalLink size={14} className="transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
-              </a>
-            </div>
-          )}
+        {/* Intelligence Tier */}
+        {!showForm && (
+            <div className="space-y-5">
+              {submission_link && (
+                <div className="space-y-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Transmission Data</span>
+                  <div className="flex">
+                    <a 
+                        href={submission_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-surface-950 border border-white/5 text-xs text-primary hover:text-white hover:border-primary/40 transition-all group/link max-w-full overflow-hidden"
+                    >
+                        <ExternalLink size={14} className="shrink-0" />
+                        <span className="truncate font-bold tracking-tight">{submission_link}</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
-          {submission_notes && (
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Influencer Notes</label>
-              <p className="text-sm text-zinc-300 leading-relaxed italic">
-                "{submission_notes}"
-              </p>
-            </div>
-          )}
+              {submission_notes && (
+                <div className="space-y-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Node Commentary</span>
+                  <div className="p-4 rounded-2xl bg-surface-950/50 border border-white/5 shadow-inner">
+                    <p className="text-xs text-text-secondary leading-relaxed font-medium italic opacity-90">
+                      "{submission_notes}"
+                    </p>
+                  </div>
+                </div>
+              )}
 
-          {/* Brand Feedback Block */}
-          {brand_feedback && (
-            <div className="mt-4 p-4 rounded-lg bg-zinc-950/50 border-l-2 border-rose-500/50 space-y-2">
-              <div className="flex items-center gap-2 text-rose-400">
-                <MessageSquare size={14} />
-                <span className="text-[10px] uppercase tracking-wider font-bold">Brand Feedback</span>
-              </div>
-              <blockquote className="text-sm text-zinc-400 leading-relaxed">
-                {brand_feedback}
-              </blockquote>
+              {brand_feedback && (
+                <div className="space-y-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-text-dim px-1">Correction Directives</span>
+                  <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 flex gap-3">
+                    <MessageSquare size={14} className="text-rose-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-rose-300/80 leading-relaxed font-medium">
+                        {brand_feedback}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Forms Rendering Block */}
-        {showForm && showInfluencerAction && (
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <MilestoneSubmitForm 
-              milestoneId={milestone.id} 
-              onSubmit={async (data) => { 
-                await onSubmit(milestone.id, data); 
-                setShowForm(false); 
-              }} 
-              onCancel={() => setShowForm(false)} 
-            />
-          </div>
         )}
-        {showForm && showBrandAction && (
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <MilestoneReviewPanel 
-              milestone={milestone} 
-              onApprove={async () => { 
-                await onApprove(milestone.id); 
-                setShowForm(false); 
-              }} 
-              onRequestRevision={async (feedback) => { 
-                await onRevision(milestone.id, feedback); 
-                setShowForm(false); 
-              }} 
-              onCancel={() => setShowForm(false)} 
-            />
-          </div>
-        )}
+
+        {/* Transaction Interfaces */}
+        <AnimatePresence>
+            {showForm && (
+                <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                >
+                    <div className="pt-6 border-t border-white/5">
+                        {showInfluencerAction && (
+                            <MilestoneSubmitForm 
+                                milestoneId={milestone.id} 
+                                onSubmit={async (data) => { await onSubmit(milestone.id, data); setShowForm(false); }} 
+                                onCancel={() => setShowForm(false)} 
+                            />
+                        )}
+                        {showBrandAction && (
+                            <MilestoneReviewPanel 
+                                milestone={milestone} 
+                                onApprove={async () => { await onApprove(milestone.id); setShowForm(false); }} 
+                                onRequestRevision={async (feedback) => { await onRevision(milestone.id, feedback); setShowForm(false); }} 
+                                onCancel={() => setShowForm(false)} 
+                            />
+                        )}
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
