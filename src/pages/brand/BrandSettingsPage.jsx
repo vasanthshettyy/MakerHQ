@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Building2, 
-  Globe, 
-  FileText, 
-  MapPin, 
-  Save, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle 
+  Building2, Globe, FileText, MapPin, 
+  Save, Loader2, CheckCircle2, AlertCircle,
+  Camera, Briefcase, Info, ExternalLink,
+  ShieldCheck, Sparkles
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
+import PageWrapper from '../../components/layout/PageWrapper';
+import { STAGGER_CONTAINER, STAGGER_ITEM, MICRO_INTERACTION, PREMIUM_SPRING } from '../../lib/motion';
 
 const BrandSettingsPage = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -25,7 +24,6 @@ const BrandSettingsPage = () => {
     description: ''
   });
 
-  // Initialize form with profile data
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -63,152 +61,186 @@ const BrandSettingsPage = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-
       await refreshProfile();
-      setMessage({ type: 'success', text: 'Settings updated successfully!' });
+      setMessage({ type: 'success', text: 'Corporate profile synchronized successfully.' });
+      setTimeout(() => setMessage(null), 5000);
     } catch (err) {
-      console.error('Error updating brand settings:', err);
-      setMessage({ type: 'error', text: err.message || 'Failed to update settings.' });
+      console.error('Update Error:', err);
+      setMessage({ type: 'error', text: err.message || 'Synchronization failed.' });
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Brand Settings</h1>
-        <p className="text-zinc-500">Manage your company profile and public information.</p>
+    <PageWrapper title="System Engine" subtitle="Configure your brand identity and workspace parameters.">
+      <div className="max-w-4xl">
+        <motion.div 
+            variants={STAGGER_CONTAINER}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        >
+            {/* Left: Nav/Info */}
+            <div className="lg:col-span-1 space-y-6">
+                <motion.div variants={STAGGER_ITEM} className="glass-card p-6 bg-primary/5 border-primary/10">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 rounded-lg bg-primary/20 text-primary border border-primary/20">
+                            <ShieldCheck size={18} />
+                        </div>
+                        <h3 className="font-display font-black text-white uppercase tracking-tight">Identity Node</h3>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed mb-6">
+                        Your public profile affects how top-tier creators perceive and value your collaboration requests.
+                    </p>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-text-dim uppercase tracking-widest bg-white/5 p-2 rounded-lg border border-white/5">
+                            <CheckCircle2 size={12} className="text-success" /> Verified Organization
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black text-text-dim uppercase tracking-widest bg-white/5 p-2 rounded-lg border border-white/5">
+                            <Sparkles size={12} className="text-primary" /> Premium Workspace
+                        </div>
+                    </div>
+                </motion.div>
+
+                <motion.div variants={STAGGER_ITEM} className="p-6 rounded-[2rem] border border-white/5 bg-surface-900/40 relative overflow-hidden">
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                        <div className="w-20 h-20 rounded-[2rem] bg-surface-800 border border-white/10 flex items-center justify-center overflow-hidden mb-4 shadow-xl group cursor-pointer relative">
+                            {profile?.logo_url ? (
+                                <img src={profile.logo_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            ) : (
+                                <Building2 size={32} className="text-text-dim" />
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Camera size={20} className="text-white" />
+                            </div>
+                        </div>
+                        <h4 className="text-sm font-bold text-white mb-1">{formData.company_name || 'Organization'}</h4>
+                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Base Node: {formData.location || 'Global'}</p>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Right: Form */}
+            <motion.div variants={STAGGER_ITEM} className="lg:col-span-2">
+                <form onSubmit={handleSubmit} className="glass-card !rounded-[2.5rem] p-8 md:p-10 border-white/5 bg-surface-900/20 space-y-8">
+                    <AnimatePresence mode="wait">
+                        {message && (
+                            <motion.div 
+                                initial={{ opacity: 0, height: 0, y: -10 }}
+                                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                exit={{ opacity: 0, height: 0, y: -10 }}
+                                className={cn(
+                                    "p-4 rounded-2xl border flex items-center gap-3 overflow-hidden",
+                                    message.type === 'success' ? "bg-success/10 border-success/20 text-success" : "bg-error/10 border-error/20 text-error"
+                                )}
+                            >
+                                {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                                <p className="text-xs font-bold uppercase tracking-widest">{message.text}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted ml-1">Entity Name</label>
+                            <div className="relative group">
+                                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim group-focus-within:text-primary transition-colors" />
+                                <input
+                                    name="company_name"
+                                    type="text"
+                                    required
+                                    value={formData.company_name}
+                                    onChange={handleChange}
+                                    className="w-full pl-11 pr-4 py-3.5 bg-surface-950/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="Acme Org"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted ml-1">Industry Sector</label>
+                            <div className="relative group">
+                                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim group-focus-within:text-primary transition-colors" />
+                                <input
+                                    name="industry"
+                                    type="text"
+                                    value={formData.industry}
+                                    onChange={handleChange}
+                                    className="w-full pl-11 pr-4 py-3.5 bg-surface-950/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="e.g. Technology"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted ml-1">Headquarters</label>
+                            <div className="relative group">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim group-focus-within:text-primary transition-colors" />
+                                <input
+                                    name="location"
+                                    type="text"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    className="w-full pl-11 pr-4 py-3.5 bg-surface-950/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="Mumbai, IN"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted ml-1">Digital Domain</label>
+                            <div className="relative group">
+                                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim group-focus-within:text-primary transition-colors" />
+                                <input
+                                    name="website"
+                                    type="url"
+                                    value={formData.website}
+                                    onChange={handleChange}
+                                    className="w-full pl-11 pr-4 py-3.5 bg-surface-950/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                    placeholder="https://acme.com"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted ml-1">Mission Protocol</label>
+                        <div className="relative group">
+                            <FileText className="absolute left-4 top-4 w-4 h-4 text-text-dim group-focus-within:text-primary transition-colors" />
+                            <textarea
+                                name="description"
+                                rows={6}
+                                value={formData.description}
+                                onChange={handleChange}
+                                className="w-full pl-11 pr-4 py-4 bg-surface-950/50 border border-white/5 rounded-[2rem] text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none resize-none leading-relaxed"
+                                placeholder="Core brand values and campaign objectives..."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4 border-t border-white/5">
+                        <motion.button
+                            {...MICRO_INTERACTION}
+                            type="submit"
+                            disabled={isSaving}
+                            className="btn-primary px-10 py-4 text-base"
+                        >
+                            {isSaving ? (
+                                <Loader2 size={20} className="animate-spin" />
+                            ) : (
+                                <>
+                                    Save Protocol
+                                    <Save size={18} className="ml-2" />
+                                </>
+                            )}
+                        </motion.button>
+                    </div>
+                </form>
+            </motion.div>
+        </motion.div>
       </div>
-
-      <div className="bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md shadow-2xl">
-        <form onSubmit={handleSubmit} className="p-8 space-y-8">
-          
-          {/* Status Message */}
-          {message && (
-            <div className={cn(
-              "p-4 rounded-xl border flex items-center gap-3 animate-in zoom-in-95 duration-300",
-              message.type === 'success' 
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
-            )}>
-              {message.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-              <p className="text-sm font-medium">{message.text}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Company Name */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                <Building2 size={16} className="text-primary" />
-                Company Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                name="company_name"
-                type="text"
-                required
-                value={formData.company_name}
-                onChange={handleChange}
-                placeholder="e.g. Acme Corp"
-                className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-              />
-            </div>
-
-            {/* Industry */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                <FileText size={16} className="text-primary" />
-                Industry
-              </label>
-              <input
-                name="industry"
-                type="text"
-                value={formData.industry}
-                onChange={handleChange}
-                placeholder="e.g. Fashion, Tech"
-                className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-              />
-            </div>
-
-            {/* Location */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                <MapPin size={16} className="text-primary" />
-                Location
-              </label>
-              <input
-                name="location"
-                type="text"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="e.g. Mumbai, India"
-                className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-              />
-            </div>
-
-            {/* Website */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                <Globe size={16} className="text-primary" />
-                Website
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">https://</span>
-                <input
-                  name="website"
-                  type="url"
-                  value={formData.website.replace(/^https?:\/\//, '')}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setFormData(prev => ({ ...prev, website: val ? `https://${val}` : '' }));
-                  }}
-                  placeholder="www.company.com"
-                  className="w-full pl-16 pr-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-              <FileText size={16} className="text-primary" />
-              Company Description
-            </label>
-            <textarea
-              name="description"
-              rows={5}
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Tell influencers about your brand, mission, and typical campaign goals..."
-              className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-white placeholder:text-zinc-700 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none"
-            />
-          </div>
-
-          {/* Action Button */}
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-lg shadow-primary/20 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={20} />
-                  Save Changes
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </PageWrapper>
   );
 };
 
