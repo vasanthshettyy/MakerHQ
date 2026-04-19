@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Star, Inbox, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import ReviewCard from './ReviewCard';
-import { cn } from '../../lib/utils';
+import { STAGGER_CONTAINER, STAGGER_ITEM } from '../../lib/motion';
 
-/**
- * ReviewList — Fetches and displays reviews for a target user.
- * 
- * @param {string} targetId - UUID of the user being reviewed.
- */
 export default function ReviewList({ targetId }) {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -44,19 +40,7 @@ export default function ReviewList({ targetId }) {
         return (
             <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="glass-card p-6 animate-pulse border-white/5">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-white/10" />
-                            <div className="space-y-2">
-                                <div className="h-3 w-24 bg-white/10 rounded" />
-                                <div className="h-2 w-16 bg-white/5 rounded" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="h-3 w-full bg-white/5 rounded" />
-                            <div className="h-3 w-3/4 bg-white/5 rounded" />
-                        </div>
-                    </div>
+                    <div key={i} className="glass-card !rounded-[2rem] h-32 animate-pulse bg-white/[0.02] border-white/5" />
                 ))}
             </div>
         );
@@ -64,23 +48,38 @@ export default function ReviewList({ targetId }) {
 
     if (reviews.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 px-4 glass-card border-dashed border-white/10">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
-                    <Star size={32} className="text-text-muted opacity-20" />
+            <div className="flex flex-col items-center justify-center py-20 px-8 glass-card !rounded-[2.5rem] border-dashed border-white/10 bg-white/[0.01]">
+                <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full" />
+                    <div className="w-16 h-16 rounded-2xl bg-surface-900 border border-white/5 flex items-center justify-center text-text-dim relative z-10">
+                        <Inbox size={32} strokeWidth={1} />
+                    </div>
                 </div>
-                <h3 className="text-white font-bold mb-1">No reviews yet</h3>
-                <p className="text-text-muted text-sm text-center max-w-[200px]">
-                    This profile hasn't received any reviews for completed work yet.
+                <h3 className="text-xl font-display font-bold text-white mb-2">Zero Signals</h3>
+                <p className="text-xs text-text-muted text-center max-w-[220px] leading-relaxed font-medium">
+                    This node has not yet established a feedback resonance from campaign transactions.
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
+        <motion.div 
+            variants={STAGGER_CONTAINER}
+            initial="hidden"
+            animate="show"
+            className="space-y-4"
+        >
             {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+                <motion.div key={review.id} variants={STAGGER_ITEM}>
+                    <ReviewCard review={review} />
+                </motion.div>
             ))}
-        </div>
+            
+            <div className="pt-6 flex items-center justify-center gap-2 opacity-30">
+                <ShieldCheck size={12} className="text-primary" />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-text-muted">Encrypted Ledger</span>
+            </div>
+        </motion.div>
     );
 }

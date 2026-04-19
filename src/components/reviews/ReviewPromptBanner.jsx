@@ -1,12 +1,9 @@
 import React from 'react';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
+import { MICRO_INTERACTION } from '../../lib/motion';
 
-/**
- * ReviewPromptBanner — A highly visible CTA for completed contracts to prompt a review.
- * Shown to both brands and influencers after a contract is finished.
- */
 export default function ReviewPromptBanner({ onReviewClick, partnerName, isBrand }) {
   const roleText = isBrand ? "influencer" : "brand";
   
@@ -15,65 +12,64 @@ export default function ReviewPromptBanner({ onReviewClick, partnerName, isBrand
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "relative overflow-hidden p-6 md:p-8 rounded-[2rem]",
-        "bg-gradient-to-r from-amber-500/10 to-yellow-500/5",
-        "border-2 border-dashed border-amber-500/20 hover:border-amber-500/40 transition-colors duration-500",
-        "backdrop-blur-xl shadow-xl shadow-amber-500/5"
+        "relative overflow-hidden p-8 rounded-[2.5rem]",
+        "bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent",
+        "border border-amber-500/20 hover:border-amber-500/40 transition-all duration-700",
+        "backdrop-blur-xl shadow-2xl shadow-amber-500/5 group"
       )}
     >
-      {/* Background Decorative Star */}
-      <div className="absolute -right-8 -bottom-8 text-amber-500/10 transform rotate-12 scale-150">
-        <Star size={160} fill="currentColor" />
+      {/* Background Decorative Element */}
+      <div className="absolute -right-12 -bottom-12 text-amber-500/5 transform rotate-12 scale-150 transition-transform duration-1000 group-hover:rotate-45">
+        <Star size={200} fill="currentColor" />
       </div>
 
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-start md:items-center gap-5">
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        <div className="flex items-start gap-6">
           {/* Animated Icon Area */}
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-xl shadow-amber-500/10 group-hover:scale-110 transition-transform">
             <motion.div
               animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 15, -15, 0]
+                scale: [1, 1.15, 1],
+                rotate: [0, 10, -10, 0]
               }}
               transition={{ 
-                duration: 2.5, 
+                duration: 4, 
                 repeat: Infinity, 
                 ease: "easeInOut" 
               }}
             >
-              <Star size={28} fill="currentColor" />
+              <Star size={32} fill="currentColor" />
             </motion.div>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Contract Completed!
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <h3 className="text-2xl font-display font-black text-white tracking-tight leading-none">
+                Node Task Terminated
               </h3>
-              <div className="hidden sm:block px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-bold uppercase tracking-widest">
+              <div className="px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-black uppercase tracking-[0.2em] shadow-glow shadow-amber-500/10">
                 Action Required
               </div>
             </div>
-            <p className="text-zinc-400 text-sm max-w-lg leading-relaxed">
-              How was your experience working with <span className="text-amber-400 font-semibold">{partnerName}</span>? 
-              Your feedback builds trust and helps the <span className="capitalize">{roleText}</span> grow.
+            <p className="text-text-secondary text-sm max-w-xl leading-relaxed font-medium">
+                The campaign lifecycle for <span className="text-amber-400 font-bold">{partnerName}</span> has concluded. 
+                Synchronize your feedback to the network ledger to finalize the collaboration signal.
             </p>
           </div>
         </div>
 
         {/* Action Button */}
         <motion.button
-          whileHover={{ scale: 1.05, x: 4 }}
-          whileTap={{ scale: 0.95 }}
+          {...MICRO_INTERACTION}
           onClick={onReviewClick}
           className={cn(
-            "flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-[0.2em] transition-all",
-            "bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20",
+            "flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.25em] transition-all",
+            "bg-amber-500 hover:bg-amber-400 text-black shadow-2xl shadow-amber-500/20",
             "group cursor-pointer shrink-0"
           )}
         >
-          Leave a Review
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          Initialize Feedback
+          <Zap size={14} fill="currentColor" className="transition-transform group-hover:scale-125" />
         </motion.button>
       </div>
     </motion.div>
