@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import StepIndicator from '../../components/onboarding/StepIndicator';
 import { INDUSTRIES, INDIAN_CITIES } from '../../lib/constants';
 import {
     Building2, MapPin, Briefcase, Upload, Globe, FileText,
-    Loader2, ArrowRight, ArrowLeft, Check,
+    Loader2, ArrowRight, ArrowLeft, Check, Sparkles
 } from 'lucide-react';
+import { PREMIUM_SPRING, STAGGER_CONTAINER, STAGGER_ITEM, MICRO_INTERACTION } from '../../lib/motion';
 
-const STEPS = ['Company Info', 'Branding', 'Description'];
+const STEPS = ['Identity', 'Profile', 'Mission'];
 
 export default function BrandOnboarding() {
     const { user, refreshProfile } = useAuth();
@@ -18,17 +20,12 @@ export default function BrandOnboarding() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Step 1 fields
     const [companyName, setCompanyName] = useState('');
     const [industry, setIndustry] = useState('');
     const [location, setLocation] = useState('');
-
-    // Step 2 fields
     const [logoFile, setLogoFile] = useState(null);
     const [logoPreview, setLogoPreview] = useState('');
     const [website, setWebsite] = useState('');
-
-    // Step 3 fields
     const [description, setDescription] = useState('');
 
     function handleLogoChange(e) {
@@ -49,17 +46,15 @@ export default function BrandOnboarding() {
     async function handleNext() {
         if (step < 3) {
             setStep(step + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
-        // Final step — save everything
         setLoading(true);
         setError('');
 
         try {
             let logoUrl = '';
-
-            // Upload logo
             if (logoFile) {
                 const fileExt = logoFile.name.split('.').pop();
                 const filePath = `${user.id}/${Date.now()}.${fileExt}`;
@@ -75,7 +70,6 @@ export default function BrandOnboarding() {
                 logoUrl = publicUrl;
             }
 
-            // Update brand profile
             const { error: updateError } = await supabase
                 .from('profiles_brand')
                 .update({
@@ -101,181 +95,227 @@ export default function BrandOnboarding() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4"
-            style={{ background: 'linear-gradient(135deg, var(--color-surface-900) 0%, #1a0a2e 50%, var(--color-surface-900) 100%)' }}
-        >
-            <div className="glass-card w-full max-w-lg p-8 fade-slide-up">
-                <h2 className="text-2xl font-display font-bold text-center mb-1">Set Up Your Brand Profile</h2>
-                <p className="text-text-secondary text-sm text-center mb-6">Complete these steps to start posting campaigns</p>
+        <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
+            
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-card w-full max-w-xl p-10 md:p-12 relative z-10"
+            >
+                <div className="text-center mb-10">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider mb-4"
+                    >
+                        <Sparkles size={12} />
+                        Brand Enrollment
+                    </motion.div>
+                    <h2 className="text-3xl font-display font-bold text-white mb-2">Build Your Presence</h2>
+                    <p className="text-text-secondary text-sm">Tell us about your brand to start hiring elite creators.</p>
+                </div>
 
                 <StepIndicator steps={STEPS} currentStep={step} />
 
-                {error && (
-                    <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-                        {error}
-                    </div>
-                )}
-
-                {/* Step 1: Company Info */}
-                {step === 1 && (
-                    <div className="space-y-4 animate-in fade-slide-up">
-                        <div className="stagger-1 animate-in fade-slide-up">
-                            <label htmlFor="companyName" className="text-sm font-medium text-text-secondary mb-1.5 block">Company Name *</label>
-                            <div className="relative group">
-                                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                                <input
-                                    id="companyName"
-                                    name="companyName"
-                                    type="text"
-                                    value={companyName}
-                                    onChange={e => setCompanyName(e.target.value)}
-                                    placeholder="Your Company Name"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="stagger-2 animate-in fade-slide-up">
-                            <label htmlFor="industry" className="text-sm font-medium text-text-secondary mb-1.5 block">Industry *</label>
-                            <div className="relative group">
-                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                                <select
-                                    id="industry"
-                                    name="industry"
-                                    value={industry}
-                                    onChange={e => setIndustry(e.target.value)}
-                                    className="appearance-none cursor-pointer"
-                                >
-                                    <option value="">Select industry</option>
-                                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="stagger-3 animate-in fade-slide-up">
-                            <label htmlFor="location" className="text-sm font-medium text-text-secondary mb-1.5 block">Location *</label>
-                            <div className="relative group">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                                <select
-                                    id="location"
-                                    name="location"
-                                    value={location}
-                                    onChange={e => setLocation(e.target.value)}
-                                    className="appearance-none cursor-pointer"
-                                >
-                                    <option value="">Select city</option>
-                                    {INDIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Step 2: Branding */}
-                {step === 2 && (
-                    <div className="space-y-6 animate-in fade-slide-up">
-                        <div className="stagger-1 animate-in fade-slide-up">
-                            <label className="text-sm font-medium text-text-secondary mb-1.5 block">Company Logo *</label>
-                            <div className="flex items-center gap-6">
-                                <label htmlFor="logo" className="group relative flex flex-col items-center justify-center w-32 h-32 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/[0.08] hover:border-primary/50 transition-all cursor-pointer overflow-hidden shadow-xl">
-                                    {logoPreview ? (
-                                        <>
-                                            <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Upload className="w-6 h-6 text-white" />
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="flex flex-col items-center">
-                                            <Upload className="w-8 h-8 text-text-muted mb-2 group-hover:text-primary transition-colors" />
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Upload Logo</span>
-                                        </div>
-                                    )}
-                                    <input id="logo" name="logo" type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                                </label>
-                                <div className="flex-1 space-y-1">
-                                    <h4 className="text-sm font-bold text-text-primary">Logo Guidelines</h4>
-                                    <p className="text-xs text-text-secondary leading-relaxed">
-                                        Use a high-quality SVG or PNG (min 400x400px). Square logos work best for profiles.
-                                    </p>
-                                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-2">Max Size: 2MB</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="stagger-2 animate-in fade-slide-up">
-                            <label htmlFor="website" className="text-sm font-medium text-text-secondary mb-1.5 block">Website (Optional)</label>
-                            <div className="relative group">
-                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                                <input
-                                    id="website"
-                                    name="website"
-                                    type="url"
-                                    value={website}
-                                    onChange={e => setWebsite(e.target.value)}
-                                    placeholder="https://yourcompany.com"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Step 3: Description */}
-                {step === 3 && (
-                    <div className="space-y-4 animate-in fade-slide-up">
-                        <div className="stagger-1 animate-in fade-slide-up">
-                            <label htmlFor="description" className="text-sm font-medium text-text-secondary mb-1.5 block flex justify-between">
-                                About Your Company * 
-                                <span className={description.length >= 50 ? 'text-emerald-500' : 'text-text-muted'}>
-                                    {description.length}/500
-                                </span>
-                            </label>
-                            <div className="relative group">
-                                <FileText className="absolute left-3 top-3 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value.slice(0, 500))}
-                                    rows={6}
-                                    className="pl-10 resize-none"
-                                    placeholder="Tell influencers about your brand vision, target audience, and why they should partner with you..."
-                                />
-                            </div>
-                            {description.length > 0 && description.length < 50 && (
-                                <p className="text-[10px] font-bold text-accent uppercase tracking-widest mt-2">
-                                    Need {50 - description.length} more characters to build trust.
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Navigation Buttons */}
-                <div className="flex items-center gap-3 mt-8">
-                    {step > 1 && (
-                        <button
-                            onClick={() => setStep(step - 1)}
-                            className="btn-secondary flex items-center gap-2 group"
+                <AnimatePresence mode="wait">
+                    {error && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mb-8 p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-xs font-bold text-center"
                         >
-                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                            Back
-                        </button>
+                            {error}
+                        </motion.div>
                     )}
-                    <button
+                </AnimatePresence>
+
+                <div className="min-h-[340px]">
+                    <AnimatePresence mode="wait">
+                        {step === 1 && (
+                            <motion.div 
+                                key="step1"
+                                variants={STAGGER_CONTAINER}
+                                initial="hidden"
+                                animate="show"
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <motion.div variants={STAGGER_ITEM} className="space-y-2">
+                                    <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted ml-1">Company Name</label>
+                                    <div className="relative group">
+                                        <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={companyName}
+                                            onChange={e => setCompanyName(e.target.value)}
+                                            className="w-full pl-11 pr-4 py-3.5 bg-surface-900/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                            placeholder="e.g. Acme Studio"
+                                        />
+                                    </div>
+                                </motion.div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <motion.div variants={STAGGER_ITEM} className="space-y-2">
+                                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted ml-1">Industry</label>
+                                        <div className="relative group">
+                                            <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none" />
+                                            <select
+                                                value={industry}
+                                                onChange={e => setIndustry(e.target.value)}
+                                                className="w-full pl-11 pr-4 py-3.5 bg-surface-900/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled className="bg-surface-800">Select Industry</option>
+                                                {INDUSTRIES.map(i => <option key={i} value={i} className="bg-surface-800">{i}</option>)}
+                                            </select>
+                                        </div>
+                                    </motion.div>
+
+                                    <motion.div variants={STAGGER_ITEM} className="space-y-2">
+                                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted ml-1">Base Location</label>
+                                        <div className="relative group">
+                                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors pointer-events-none" />
+                                            <select
+                                                value={location}
+                                                onChange={e => setLocation(e.target.value)}
+                                                className="w-full pl-11 pr-4 py-3.5 bg-surface-900/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled className="bg-surface-800">Select City</option>
+                                                {INDIAN_CITIES.map(c => <option key={c} value={c} className="bg-surface-800">{c}</option>)}
+                                            </select>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 2 && (
+                            <motion.div 
+                                key="step2"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-8"
+                            >
+                                <div className="flex flex-col sm:flex-row items-center gap-8 bg-white/2 p-6 rounded-[2rem] border border-white/5">
+                                    <div className="relative group">
+                                        <div className="w-32 h-32 rounded-[2rem] bg-surface-800 border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/50 group-hover:bg-surface-700">
+                                            {logoPreview ? (
+                                                <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Upload className="w-8 h-8 text-text-muted group-hover:text-primary transition-colors" />
+                                            )}
+                                            <input type="file" accept="image/*" onChange={handleLogoChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                        </div>
+                                        {logoPreview && (
+                                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">
+                                                <Check size={12} strokeWidth={4} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="flex-1 text-center sm:text-left">
+                                        <h4 className="text-lg font-bold text-white mb-2">Corporate Identity</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                                            Upload a high-resolution logo (min 400x400px). 
+                                            This is the first thing creators see.
+                                        </p>
+                                        <span className="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">
+                                            PNG, SVG or JPG • Max 2MB
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted ml-1">Official Website</label>
+                                    <div className="relative group">
+                                        <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                                        <input
+                                            type="url"
+                                            value={website}
+                                            onChange={e => setWebsite(e.target.value)}
+                                            className="w-full pl-11 pr-4 py-3.5 bg-surface-900/50 border border-white/5 rounded-2xl text-sm text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                                            placeholder="https://acme.com"
+                                        />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 3 && (
+                            <motion.div 
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center px-1">
+                                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">Brand Story</label>
+                                        <span className={`text-[10px] font-bold ${description.length >= 50 ? 'text-success' : 'text-text-dim'}`}>
+                                            {description.length} / 500
+                                        </span>
+                                    </div>
+                                    <div className="relative group">
+                                        <FileText className="absolute left-4 top-4 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                                        <textarea
+                                            value={description}
+                                            onChange={e => setDescription(e.target.value.slice(0, 500))}
+                                            rows={8}
+                                            className="w-full pl-11 pr-4 py-4 bg-surface-900/50 border border-white/5 rounded-[2rem] text-sm text-white placeholder:text-text-dim focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none resize-none leading-relaxed"
+                                            placeholder="Describe your brand's vision, target demographic, and what makes your products unique..."
+                                        />
+                                    </div>
+                                    {description.length > 0 && description.length < 50 && (
+                                        <motion.p 
+                                            initial={{ opacity: 0 }} 
+                                            animate={{ opacity: 1 }}
+                                            className="text-[10px] font-bold text-accent uppercase tracking-widest mt-2 flex items-center gap-1"
+                                        >
+                                            <div className="w-1 h-1 rounded-full bg-accent animate-ping" />
+                                            Needs {50 - description.length} more characters to proceed
+                                        </motion.p>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                <div className="flex items-center gap-4 mt-12">
+                    {step > 1 && (
+                        <motion.button
+                            {...MICRO_INTERACTION}
+                            onClick={() => setStep(step - 1)}
+                            className="btn-secondary px-8"
+                        >
+                            <ArrowLeft size={18} />
+                        </motion.button>
+                    )}
+                    <motion.button
+                        {...MICRO_INTERACTION}
                         onClick={handleNext}
                         disabled={!canProceed() || loading}
-                        className="btn-primary flex-1 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:active:scale-100"
+                        className="btn-primary flex-1 py-4 text-base"
                     >
                         {loading ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" /> Finalizing...</>
+                            <Loader2 className="w-5 h-5 animate-spin" />
                         ) : step === 3 ? (
-                            <><Check className="w-4 h-4 group-hover:scale-110 transition-transform" /> Start Growing</>
+                            <>
+                                Finalize Profile
+                                <Check size={20} className="ml-2" />
+                            </>
                         ) : (
-                            <>Next <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+                            <>
+                                Continue
+                                <ArrowRight size={20} className="ml-2" />
+                            </>
                         )}
-                    </button>
+                    </motion.button>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
