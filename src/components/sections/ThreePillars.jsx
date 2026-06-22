@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import SectionHeading from "../ui/SectionHeading";
 
 const pillars = [
@@ -11,7 +11,8 @@ const pillars = [
 export default function ThreePillars() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.6"] });
-  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const lineScale = useTransform(smoothProgress, [0, 1], [0, 1]);
 
   return (
     <section ref={ref} className="py-12">

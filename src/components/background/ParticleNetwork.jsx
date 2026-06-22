@@ -47,18 +47,31 @@ export default function ParticleNetwork({ density = 60 }) {
         if (p.y < 0 || p.y > h) p.vy *= -1;
 
         const dx = p.x - mouse.x, dy = p.y - mouse.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 120) { p.x += dx / dist * 0.6; p.y += dy / dist * 0.6; }
+        if (Math.abs(dx) < 120 && Math.abs(dy) < 120) {
+          const distSq = dx * dx + dy * dy;
+          if (distSq < 14400) { // 120^2
+            const dist = Math.sqrt(distSq);
+            if (dist > 0) {
+              p.x += (dx / dist) * 0.6;
+              p.y += (dy / dist) * 0.6;
+            }
+          }
+        }
       }
 
       ctx.strokeStyle = "rgba(167, 139, 250, 0.12)";
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const a = particles[i], b = particles[j];
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < 110) {
-            ctx.globalAlpha = 1 - d / 110;
-            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          if (Math.abs(dx) < 110 && Math.abs(dy) < 110) {
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 12100) { // 110^2
+              const d = Math.sqrt(distSq);
+              ctx.globalAlpha = 1 - d / 110;
+              ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            }
           }
         }
       }
