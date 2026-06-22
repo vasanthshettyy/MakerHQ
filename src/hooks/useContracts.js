@@ -36,7 +36,46 @@ export function useContracts() {
     }
 
     useEffect(() => {
-        if (user && role) fetchContracts();
+        if (!user || !role) return;
+
+        fetchContracts();
+
+        // Subscribe to real-time changes on contracts table
+        const contractsChannel = supabase
+            .channel('public-contracts-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'contracts'
+                },
+                () => {
+                    fetchContracts();
+                }
+            )
+            .subscribe();
+
+        // Subscribe to real-time changes on contract milestones table
+        const milestonesChannel = supabase
+            .channel('public-milestones-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'contract_milestones'
+                },
+                () => {
+                    fetchContracts();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(contractsChannel);
+            supabase.removeChannel(milestonesChannel);
+        };
     }, [user, role]);
 
     // Milestone operations (influencer submits, brand reviews)

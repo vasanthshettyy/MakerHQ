@@ -42,7 +42,29 @@ export function useProposals(gigId = null) {
     }
 
     useEffect(() => {
+        if (!user) return;
+        
         fetchProposals();
+
+        // Subscribe to real-time changes on proposals table
+        const channel = supabase
+            .channel('public-proposals-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'proposals'
+                },
+                () => {
+                    fetchProposals();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user, role, gigId]);
 
     async function submitProposal(gigId, proposalData) {
