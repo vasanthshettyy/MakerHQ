@@ -31,6 +31,8 @@ const InfluencerSettingsPage = lazy(() => import('../pages/influencer/Influencer
 const ChatInterface = lazy(() => import('../components/messages/ChatInterface'));
 const PublicProfile = lazy(() => import('../pages/influencer/PublicProfile'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const PublicLayout = lazy(() => import('../components/layout/PublicLayout'));
+const LandingPage = lazy(() => import('../pages/LandingPage'));
 
 // Admin Pages
 const AdminLayout = lazy(() => import('../pages/admin/AdminLayout'));
@@ -52,9 +54,14 @@ export default function AppRouter() {
         <BrowserRouter>
             <Suspense fallback={<PageFallback />}>
                 <Routes>
+                    {/* Public Layout Routes */}
+                    <Route element={<PublicLayout />}>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                    </Route>
+
                     {/* Public Routes */}
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
                     <Route path="/select-role" element={
                         <ProtectedRoute><RoleSelectPage /></ProtectedRoute>
                     } />
