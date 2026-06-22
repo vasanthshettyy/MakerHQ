@@ -35,15 +35,26 @@ export function useGigs() {
 
         fetchGigs();
 
-        // Subscribe to real-time changes on the gigs table
+        // Subscribe to real-time changes on the gigs and brand profiles tables
         const channel = supabase
-            .channel('public-gigs-changes')
+            .channel('public-gigs-and-brand-profiles-changes')
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
                     table: 'gigs'
+                },
+                () => {
+                    fetchGigs();
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'profiles_brand'
                 },
                 () => {
                     fetchGigs();

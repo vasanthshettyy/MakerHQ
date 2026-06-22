@@ -40,9 +40,9 @@ export function useContracts() {
 
         fetchContracts();
 
-        // Subscribe to real-time changes on contracts table
-        const contractsChannel = supabase
-            .channel('public-contracts-changes')
+        // Subscribe to real-time changes on contracts, milestones, and profiles tables
+        const channel = supabase
+            .channel('public-contracts-milestones-and-profiles-changes')
             .on(
                 'postgres_changes',
                 {
@@ -54,11 +54,6 @@ export function useContracts() {
                     fetchContracts();
                 }
             )
-            .subscribe();
-
-        // Subscribe to real-time changes on contract milestones table
-        const milestonesChannel = supabase
-            .channel('public-milestones-changes')
             .on(
                 'postgres_changes',
                 {
@@ -70,11 +65,32 @@ export function useContracts() {
                     fetchContracts();
                 }
             )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'profiles_brand'
+                },
+                () => {
+                    fetchContracts();
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'profiles_influencer'
+                },
+                () => {
+                    fetchContracts();
+                }
+            )
             .subscribe();
 
         return () => {
-            supabase.removeChannel(contractsChannel);
-            supabase.removeChannel(milestonesChannel);
+            supabase.removeChannel(channel);
         };
     }, [user, role]);
 
