@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=cabinet-grotesk@400,500,700&display=swap');
 @import "tailwindcss";
 
 /* ===========================
@@ -60,6 +61,22 @@
 
   /* Easing */
   --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Landing Page Variables */
+  --color-primary: hsl(262 83% 68%);
+  --color-primary-glow: hsl(262 83% 68% / 0.35);
+  --color-accent: hsl(174 72% 56%);
+  --color-accent-glow: hsl(174 72% 56% / 0.35);
+  --color-bg: hsl(222.2 84% 4.9%);
+  --color-card: rgba(15, 23, 42, 0.45);
+  --color-border: rgba(148, 163, 184, 0.12);
+
+  --font-display: "Cabinet Grotesk", "Clash Display", "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --animate-aurora-drift: aurora-drift 22s ease-in-out infinite alternate;
+  --animate-grid-pulse: grid-pulse 6s ease-in-out infinite;
 }
 
 @layer base {
@@ -217,4 +234,17 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Landing Page Additions */
+.text-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+.text-mono-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+@keyframes aurora-drift {
+  0%   { transform: translate(-5%, -5%) scale(1); }
+  100% { transform: translate(5%, 8%) scale(1.15); }
+}
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.32; }
 }

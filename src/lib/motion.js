@@ -1,3 +1,5 @@
+import { useReducedMotion } from 'framer-motion';
+
 /**
  * BrandSync Premium Motion Tokens
  * Standardized for 60fps performance and Apple-tier fluidity.
@@ -82,3 +84,32 @@ export const GHOST_INTERACTION = {
   whileTap: { opacity: 0.9 },
   transition: { duration: 0.2 }
 };
+
+// Landing Page Specific Motion Spec
+export const EASE = [0.16, 1, 0.3, 1]; // signature "ease-out-expo"-ish curve, used everywhere
+
+export const durations = { fast: 0.18, base: 0.32, slow: 0.55, stagger: 0.08 };
+
+export const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: durations.slow, ease: EASE } },
+};
+
+export const staggerContainer = (stagger = durations.stagger) => ({
+  hidden: {},
+  visible: { transition: { staggerChildren: stagger, delayChildren: 0.1 } },
+});
+
+export const sandboxStepTransition = {
+  initial: { opacity: 0, x: 24 },
+  animate: { opacity: 1, x: 0, transition: { duration: durations.base, ease: EASE } },
+  exit: { opacity: 0, x: -24, transition: { duration: durations.fast, ease: EASE } },
+};
+
+export const springSnappy = { type: "spring", stiffness: 300, damping: 24 };
+export const springSoft = { type: "spring", stiffness: 150, damping: 18 };
+
+export function useAccessibleMotion(customTransition, fallbackTransition = { duration: 0.01 }) {
+  const shouldReduceMotion = useReducedMotion();
+  return shouldReduceMotion ? fallbackTransition : customTransition;
+}
