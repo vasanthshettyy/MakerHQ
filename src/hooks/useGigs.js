@@ -31,7 +31,29 @@ export function useGigs() {
     }
 
     useEffect(() => {
-        if (user) fetchGigs();
+        if (!user) return;
+
+        fetchGigs();
+
+        // Subscribe to real-time changes on the gigs table
+        const channel = supabase
+            .channel('public-gigs-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'gigs'
+                },
+                () => {
+                    fetchGigs();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user, role]);
 
     async function createGig(gigData) {
