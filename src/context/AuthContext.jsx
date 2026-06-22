@@ -69,6 +69,7 @@ export function AuthProvider({ children }) {
         setUser(null);
         setProfile(null);
         setRole(null);
+        window.location.href = '/';
     }
 
     const refreshProfile = useCallback(async () => {
