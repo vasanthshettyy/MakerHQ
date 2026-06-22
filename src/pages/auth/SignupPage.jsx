@@ -106,6 +106,12 @@ export default function SignupPage() {
                 transition={PREMIUM_SPRING}
                 className="glass-card w-full max-w-[460px] p-10 relative z-10"
             >
+                {/* Back to Home Link */}
+                <div className="mb-4 text-left">
+                    <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-text-muted hover:text-white transition-colors">
+                        ← Back to Home
+                    </Link>
+                </div>
                 {/* Logo Section */}
                 <motion.div 
                     variants={STAGGER_CONTAINER}
