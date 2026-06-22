@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sandboxStepTransition, staggerContainer, fadeUp } from "../../../lib/motion";
-import { creators, niches } from "../../../lib/mockData";
+import { creators as fallbackCreators, niches } from "../../../lib/mockData";
+import { supabase } from "../../../lib/supabase";
 import FilterPanel from "./FilterPanel";
 import CreatorCard from "./CreatorCard";
 import ContractTimeline from "./ContractTimeline";
@@ -10,8 +11,40 @@ export default function BrandFlow() {
   const [step, setStep] = useState("search");     // search -> filters -> profile -> offer -> contract
   const [niche, setNiche] = useState("All");
   const [selected, setSelected] = useState(null);
+  const [dbCreators, setDbCreators] = useState([]);
 
-  const visible = niche === "All" ? creators : creators.filter((c) => c.niche === niche);
+  useEffect(() => {
+    async function loadCreators() {
+      try {
+        const { data, error } = await supabase
+          .from("profiles_influencer")
+          .select("*")
+          .eq("onboarding_complete", true)
+          .limit(8);
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          const mapped = data.map((i) => ({
+            id: i.id,
+            name: i.full_name || "Anonymous Creator",
+            niche: i.niche || "General",
+            city: i.city || "India",
+            followers: i.followers_count || 0,
+            engagement: i.engagement_rate || 0,
+            verified: i.is_verified || false,
+            rate: i.price_per_post || 10000,
+          }));
+          setDbCreators(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load real creators for landing page sandbox:", err);
+      }
+    }
+    loadCreators();
+  }, []);
+
+  const creatorsList = dbCreators.length > 0 ? dbCreators : fallbackCreators;
+  const visible = niche === "All" ? creatorsList : creatorsList.filter((c) => c.niche === niche);
 
   return (
     <AnimatePresence mode="wait">

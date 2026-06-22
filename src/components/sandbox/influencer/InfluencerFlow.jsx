@@ -1,13 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sandboxStepTransition } from "../../../lib/motion";
-import { campaign } from "../../../lib/mockData";
+import { campaign as fallbackCampaign } from "../../../lib/mockData";
+import { supabase } from "../../../lib/supabase";
 import PriceSlider from "./PriceSlider";
 import MilestoneTracker from "./MilestoneTracker";
 
 export default function InfluencerFlow() {
   const [step, setStep] = useState("apply"); // apply -> price -> milestones
   const [price, setPrice] = useState(15000);
+  const [activeCampaign, setActiveCampaign] = useState(null);
+
+  useEffect(() => {
+    async function loadRealGig() {
+      try {
+        const { data, error } = await supabase
+          .from("gigs")
+          .select("*, profiles_brand(company_name)")
+          .eq("status", "Open")
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (data) {
+          setActiveCampaign({
+            id: data.id,
+            brand: data.profiles_brand?.company_name || "Partner Brand",
+            title: data.title,
+            budgetRange: [Math.round(data.budget * 0.7), Math.round(data.budget * 1.3)],
+            briefLine: data.description,
+          });
+          setPrice(Math.round(data.budget));
+        }
+      } catch (err) {
+        console.error("Failed to load real gig for landing page sandbox:", err);
+      }
+    }
+    loadRealGig();
+  }, []);
+
+  const campaign = activeCampaign || fallbackCampaign;
+  const minPrice = campaign.budgetRange ? campaign.budgetRange[0] : 8000;
+  const maxPrice = campaign.budgetRange ? campaign.budgetRange[1] : 25000;
 
   return (
     <AnimatePresence mode="wait">
@@ -28,7 +62,7 @@ export default function InfluencerFlow() {
       {step === "price" && (
         <motion.div key="price" {...sandboxStepTransition} className="max-w-md mx-auto text-center py-10">
           <p className="text-slate-300 text-sm mb-6">Quote your custom price for this campaign deliverables.</p>
-          <PriceSlider value={price} onChange={setPrice} min={8000} max={25000} />
+          <PriceSlider value={price} onChange={setPrice} min={minPrice} max={maxPrice} />
           <div className="flex justify-center gap-4 mt-8">
             <button
               onClick={() => setStep("apply")}
