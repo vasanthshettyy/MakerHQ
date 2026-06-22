@@ -30,6 +30,26 @@ export default function UserManagementPage() {
 
     useEffect(() => {
         fetchUsers();
+
+        // Subscribe to real-time changes on the users table
+        const channel = supabase
+            .channel('public-users-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'users'
+                },
+                () => {
+                    fetchUsers();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     async function toggleUserStatus(userId, newStatus) {

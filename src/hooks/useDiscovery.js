@@ -105,6 +105,26 @@ export function useDiscovery() {
 
     useEffect(() => {
         fetchInfluencers();
+
+        // Subscribe to real-time changes on profiles_influencer table
+        const channel = supabase
+            .channel('public-influencer-profiles-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'profiles_influencer'
+                },
+                () => {
+                    fetchInfluencers();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchInfluencers]);
 
     function updateFilter(key, value) {
