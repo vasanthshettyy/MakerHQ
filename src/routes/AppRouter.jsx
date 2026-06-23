@@ -83,6 +83,7 @@ export default function AppRouter() {
                         <Route path="dashboard" element={<BrandDashboard />} />
                         <Route path="discover" element={<DiscoverPage />} />
                         <Route path="gigs" element={<BrandGigsPage />} />
+                        <Route path="applications" element={<Navigate to="/brand/gigs" replace />} />
                         <Route path="gigs/:gigId/applications" element={<ManageApplicationsPage />} />
                         <Route path="contracts" element={<BrandContractsPage />} />
                         <Route path="contracts/:contractId" element={<BrandContractsPage />} />
