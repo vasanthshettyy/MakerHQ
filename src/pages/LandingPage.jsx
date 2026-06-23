@@ -1,6 +1,7 @@
 import Hero from "../components/sections/Hero";
 import LiveSandbox from "../components/sandbox/LiveSandbox";
 import ThreePillars from "../components/sections/ThreePillars";
+import SocialProof from "../components/sections/SocialProof";
 import CTASection from "../components/sections/CTASection";
 
 export default function LandingPage() {
@@ -9,6 +10,7 @@ export default function LandingPage() {
       <Hero />
       <LiveSandbox />
       <ThreePillars />
+      <SocialProof />
       <CTASection />
     </main>
   );

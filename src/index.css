@@ -41,9 +41,9 @@
   --color-text-dim: #475569;
 
   /* Apple-style Blur & Glass */
-  --color-glass-surface: rgba(15, 15, 25, 0.7);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-glass-border-bright: rgba(255, 255, 255, 0.12);
+  --color-glass-surface: rgba(10, 10, 18, 0.45);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-border-bright: rgba(255, 255, 255, 0.18);
   --color-glass-highlight: rgba(255, 255, 255, 0.03);
 
   /* Elevation Shadows (Multi-layered) */

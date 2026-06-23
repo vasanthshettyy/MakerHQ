@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BackgroundLayer from '../background/BackgroundLayer';
+import Footer from './Footer';
 import makerhqMark from '../../assets/makerhq-mark.png';
 
 export default function PublicLayout() {
@@ -14,7 +15,7 @@ export default function PublicLayout() {
     : '/login';
 
   return (
-    <div className="min-h-screen relative text-white bg-bg">
+    <div className="min-h-screen relative text-white bg-transparent">
       <BackgroundLayer />
       
       {/* Premium Glassmorphic Navbar */}
@@ -43,6 +44,8 @@ export default function PublicLayout() {
       </header>
 
       <Outlet />
+
+      <Footer />
     </div>
   );
 }
