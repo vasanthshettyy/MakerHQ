@@ -1,49 +1,64 @@
 import { motion } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 import { PAGE_TRANSITION, STAGGER_CONTAINER, STAGGER_ITEM } from '../../lib/motion';
+import { cn } from '../../lib/utils';
 
 export default function PageWrapper({ children, title, subtitle }) {
+    const { isDark } = useTheme();
+
     return (
         <motion.div
             variants={PAGE_TRANSITION}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="w-full px-6 py-10 md:px-12"
+            className="w-full px-6 py-8 md:px-10"
         >
             <div className="max-w-[1400px] mx-auto">
                 {(title || subtitle) && (
-                    <motion.div 
+                    <motion.div
                         variants={STAGGER_CONTAINER}
                         initial="hidden"
                         animate="show"
-                        className="mb-12 relative"
+                        className="mb-10 relative pl-5"
                     >
-                        {/* Title Bar Accent */}
-                        <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full hidden md:block" />
-                        
+                        {/* Left accent bar — matches primary brand color */}
+                        <motion.div
+                            variants={STAGGER_ITEM}
+                            className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-gradient-to-b from-primary to-secondary"
+                            style={{ boxShadow: '0 0 10px rgba(99,102,241,0.4)' }}
+                        />
+
                         {title && (
-                            <motion.h1 
+                            <motion.h1
                                 variants={STAGGER_ITEM}
-                                className="text-4xl md:text-5xl font-display font-black text-text-primary tracking-tight leading-tight"
+                                className={cn(
+                                    'text-3xl md:text-4xl font-display font-black tracking-tight leading-tight',
+                                    'text-text-primary',
+                                )}
                             >
                                 {title}
                             </motion.h1>
                         )}
+
                         {subtitle && (
-                            <motion.p 
+                            <motion.p
                                 variants={STAGGER_ITEM}
-                                className="text-lg text-text-secondary mt-3 max-w-3xl font-medium leading-relaxed"
+                                className={cn(
+                                    'text-sm md:text-base mt-2.5 max-w-2xl font-medium leading-relaxed',
+                                    isDark ? 'text-text-secondary' : 'text-text-muted',
+                                )}
                             >
                                 {subtitle}
                             </motion.p>
                         )}
                     </motion.div>
                 )}
-                
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
+
+                <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.4 }}
                     className="w-full"
                 >
                     {children}

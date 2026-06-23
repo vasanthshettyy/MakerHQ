@@ -1,11 +1,24 @@
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Search, Menu, Command, LayoutGrid, Sun, Moon } from 'lucide-react';
+import { Search, Menu, Command, Sun, Moon } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import NotificationBell from '../notifications/NotificationBell';
-import { PREMIUM_SPRING, MICRO_INTERACTION } from '../../lib/motion';
+import { MICRO_INTERACTION } from '../../lib/motion';
 import { cn } from '../../lib/utils';
+
+const PAGE_LABELS = {
+    dashboard:    'Dashboard',
+    discover:     'Discovery',
+    gigs:         'Campaigns',
+    contracts:    'Contracts',
+    messages:     'Messages',
+    settings:     'Settings',
+    proposals:    'My Bids',
+    profile:      'Profile',
+    users:        'Directory',
+    verification: 'Compliance',
+};
 
 export default function Topbar({ onMenuClick }) {
     const { profile, role } = useAuth();
@@ -13,91 +26,149 @@ export default function Topbar({ onMenuClick }) {
     const location = useLocation();
 
     const pathParts = location.pathname.split('/').filter(Boolean);
-    const pageTitle = pathParts.length > 1
-        ? pathParts[1].charAt(0).toUpperCase() + pathParts[1].slice(1).replace('-', ' ')
-        : 'Overview';
+    const rawSegment = pathParts[1] ?? pathParts[0] ?? '';
+    const pageTitle = PAGE_LABELS[rawSegment] ?? (rawSegment.charAt(0).toUpperCase() + rawSegment.slice(1).replace(/-/g, ' ') || 'Overview');
 
-    const displayName = role === 'brand'
-        ? profile?.company_name || 'Brand Entity'
-        : role === 'influencer'
-            ? profile?.full_name || 'Creator Node'
-            : 'System Admin';
+    const displayName =
+        role === 'brand'      ? (profile?.company_name || 'Brand Entity')  :
+        role === 'influencer' ? (profile?.full_name    || 'Creator Node')  :
+                                'System Admin';
 
     return (
-        <header className="relative z-[40] flex items-center justify-between gap-6 px-4 md:px-2">
-            {/* Left: Branding/Context */}
+        <header className={cn(
+            'relative z-[40] flex items-center justify-between gap-6 px-4 md:px-2 py-1',
+        )}>
+            {/* ── Mobile menu button ─── */}
             <div className="flex items-center gap-4 lg:hidden">
                 <motion.button
                     {...MICRO_INTERACTION}
                     onClick={onMenuClick}
-                    className="p-3 rounded-2xl bg-surface-900 border border-white/10 text-text-muted shadow-xl"
+                    className={cn(
+                        'p-3 rounded-2xl border text-text-muted shadow-xl transition-colors',
+                        isDark
+                            ? 'bg-surface-900 border-white/10 hover:text-text-primary'
+                            : 'bg-white border-black/08 hover:text-text-primary',
+                    )}
                 >
                     <Menu size={20} />
                 </motion.button>
             </div>
 
-            <div className="hidden lg:flex flex-col">
-                <motion.div 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-2.5 mb-1.5"
+            {/* ── Page title (desktop) ─── */}
+            <div className="hidden lg:flex flex-col gap-1">
+                {/* Breadcrumb eyebrow */}
+                <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary opacity-80" />
+                    <span className={cn(
+                        'text-[9px] font-black uppercase tracking-[0.3em]',
+                        isDark ? 'text-text-dim' : 'text-text-muted',
+                    )}>
+                        {role ?? 'workspace'} · network
+                    </span>
+                </div>
+                <motion.h1
+                    key={pageTitle}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22 }}
+                    className="text-[22px] font-display font-black text-text-primary tracking-tight leading-none uppercase"
                 >
-                    <div className="p-1 rounded-md bg-primary/10 border border-primary/20">
-                        <LayoutGrid size={10} className="text-primary" />
-                    </div>
-                    <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.3em]">Network Workspace</span>
-                </motion.div>
-                <h1 className="text-2xl font-display font-black text-text-primary tracking-tighter uppercase">{pageTitle}</h1>
+                    {pageTitle}
+                </motion.h1>
             </div>
 
-            {/* Center: Omni-Search */}
-            <div className="flex-1 max-w-2xl hidden md:block">
+            {/* ── Omni-search ─── */}
+            <div className="flex-1 max-w-xl hidden md:block">
                 <div className="relative group">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <Search size={16} className="text-text-dim group-focus-within:text-primary transition-colors" />
+                        <Search size={15} className="text-text-dim group-focus-within:text-primary transition-colors" />
                     </div>
-                    <input 
+                    <input
                         type="text"
-                        placeholder="Search collaborations, talent, or nodes..."
-                        className="w-full bg-surface-950/40 border border-border rounded-2xl py-3.5 pl-12 pr-16 text-sm text-text-primary placeholder:text-text-dim focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none backdrop-blur-xl shadow-inner"
+                        placeholder="Search campaigns, talent, gigs…"
+                        className={cn(
+                            'w-full rounded-2xl py-3 pl-11 pr-16 text-sm placeholder:text-text-dim outline-none transition-all',
+                            'focus:ring-4 focus:ring-primary/10 focus:border-primary/40',
+                            isDark
+                                ? 'bg-surface-950/40 border border-white/[0.07] text-text-primary backdrop-blur-xl'
+                                : 'bg-black/[0.03] border border-black/[0.07] text-text-primary',
+                        )}
                     />
                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface-900 border border-border text-[9px] font-black text-text-dim uppercase tracking-tighter">
-                            <Command size={10} /> K
+                        <div className={cn(
+                            'flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-black text-text-dim uppercase tracking-tighter border',
+                            isDark ? 'bg-surface-900 border-white/[0.07]' : 'bg-white border-black/[0.07]',
+                        )}>
+                            <Command size={9} /> K
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Right: Global Actions */}
-            <div className="flex items-center gap-4 md:gap-6">
-                {/* Theme Toggle Switch */}
+            {/* ── Right action cluster ─── */}
+            <div className="flex items-center gap-3">
+                {/* Theme toggle */}
                 <motion.button
                     {...MICRO_INTERACTION}
                     onClick={toggleTheme}
-                    className="p-3 rounded-2xl bg-surface-900/10 border border-border dark:bg-white/[0.03] dark:border-white/5 text-text-muted hover:text-text-primary dark:hover:text-white transition-colors"
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                    className={cn(
+                        'relative p-2.5 rounded-2xl border transition-colors overflow-hidden group',
+                        isDark
+                            ? 'bg-surface-900/60 border-white/[0.07] text-text-muted hover:text-amber-300 hover:border-amber-400/20 hover:bg-amber-400/[0.07]'
+                            : 'bg-white border-black/[0.07] text-text-muted hover:text-indigo-500 hover:border-primary/20 hover:bg-primary/[0.06]',
+                    )}
                 >
-                    {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                    <motion.div
+                        key={isDark ? 'sun' : 'moon'}
+                        initial={{ rotate: -30, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                    </motion.div>
                 </motion.button>
 
+                {/* Notification bell */}
                 <NotificationBell />
-                
-                <div className="h-10 w-px bg-border hidden md:block" />
 
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
+                {/* Divider */}
+                <div className={cn(
+                    'h-8 w-px hidden md:block',
+                    isDark ? 'bg-white/[0.07]' : 'bg-black/[0.08]',
+                )} />
+
+                {/* User chip */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-3.5 p-1 pr-5 rounded-2xl bg-surface-900/10 border border-border dark:bg-white/[0.03] dark:border-white/5 hover:bg-surface-900/20 dark:hover:bg-white/[0.06] hover:border-primary/20 dark:hover:border-white/10 transition-all cursor-pointer group shadow-xl"
+                    className={cn(
+                        'flex items-center gap-3 p-1 pr-4 rounded-2xl border cursor-pointer group transition-all',
+                        isDark
+                            ? 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.06] hover:border-white/10 shadow-xl'
+                            : 'bg-white border-black/[0.07] hover:bg-black/[0.02] hover:border-black/10 shadow-md',
+                    )}
                 >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-border relative overflow-hidden group-hover:scale-105 transition-transform">
-                        <span className="relative z-10 text-primary font-black text-xs">{displayName.charAt(0)}</span>
+                    <div className={cn(
+                        'w-9 h-9 rounded-xl flex items-center justify-center border relative overflow-hidden group-hover:scale-105 transition-transform',
+                        isDark
+                            ? 'bg-gradient-to-br from-primary/20 to-secondary/20 border-white/10'
+                            : 'bg-gradient-to-br from-primary/15 to-secondary/15 border-primary/15',
+                    )}>
+                        <span className="relative z-10 text-primary font-black text-xs">
+                            {displayName.charAt(0)}
+                        </span>
                         <div className="absolute inset-0 bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                     <div className="hidden sm:flex flex-col">
-                        <span className="text-xs font-black text-text-primary truncate max-w-[120px] leading-none mb-1.5 uppercase tracking-wide">{displayName}</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
-                            <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Node Online</span>
+                        <span className="text-[11px] font-black text-text-primary truncate max-w-[110px] leading-none mb-1.5 uppercase tracking-wide">
+                            {displayName}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                            <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.18em]">
+                                Online
+                            </span>
                         </div>
                     </div>
                 </motion.div>
