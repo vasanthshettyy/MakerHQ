@@ -59,7 +59,7 @@ export default function ParticleNetwork({ density = 60 }) {
         }
       }
 
-      ctx.strokeStyle = "rgba(167, 139, 250, 0.12)";
+      ctx.strokeStyle = "rgba(139, 92, 246, 0.15)";
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const a = particles[i], b = particles[j];
@@ -76,7 +76,7 @@ export default function ParticleNetwork({ density = 60 }) {
         }
       }
       ctx.globalAlpha = 1;
-      ctx.fillStyle = "rgba(45, 212, 191, 0.5)";
+      ctx.fillStyle = "rgba(99, 102, 241, 0.55)";
       for (const p of particles) {
         ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2); ctx.fill();
       }

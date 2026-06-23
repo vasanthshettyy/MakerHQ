@@ -24,7 +24,7 @@ export default function PageWrapper({ children, title, subtitle }) {
                         {title && (
                             <motion.h1 
                                 variants={STAGGER_ITEM}
-                                className="text-4xl md:text-5xl font-display font-black text-white tracking-tight leading-tight"
+                                className="text-4xl md:text-5xl font-display font-black text-text-primary tracking-tight leading-tight"
                             >
                                 {title}
                             </motion.h1>

@@ -12,31 +12,25 @@ export default function LiveSandbox() {
   return (
     <motion.section
       id="live-sandbox"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={fadeUp}
-      className="relative"
+      initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
+      variants={fadeUp} className="relative w-full"
     >
-      <div className="flex flex-col items-center text-center mb-10">
+      <div className="flex flex-col items-center text-center mb-12">
         <p className="text-accent text-sm font-mono uppercase tracking-widest mb-3">Try it live</p>
-        <h2 className="text-display text-4xl md:text-5xl font-semibold text-white mb-4">
+        <h2 className="text-display text-4xl md:text-5xl font-semibold text-text-primary mb-4">
           This isn't a demo video. It's the product.
         </h2>
+        <p className="text-slate-400 max-w-lg mb-8 text-sm md:text-base leading-relaxed">
+          Interact with our live contract and milestone state machine right here. Switch between views to see how brands and creators collaborate.
+        </p>
         <ModeToggle mode={mode} setMode={setMode} />
       </div>
 
-      <GlassCard className="p-6 md:p-10 min-h-[480px]">
+      <GlassCard className="p-6 md:p-10 min-h-[480px] bg-surface-900/10 border-border">
         <AnimatePresence mode="wait">
-          {mode === "brand" ? (
-            <motion.div key="brand" className="w-full">
-              <BrandFlow />
-            </motion.div>
-          ) : (
-            <motion.div key="influencer" className="w-full">
-              <InfluencerFlow />
-            </motion.div>
-          )}
+          {mode === "brand"
+            ? <motion.div key="brand"><BrandFlow /></motion.div>
+            : <motion.div key="influencer"><InfluencerFlow /></motion.div>}
         </AnimatePresence>
       </GlassCard>
     </motion.section>

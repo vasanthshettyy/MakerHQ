@@ -63,8 +63,8 @@ export default function Sidebar() {
             transition={PREMIUM_SPRING}
             className={cn(
                 "z-50 hidden lg:flex flex-col h-full relative group/sidebar",
-                "glass-card !rounded-[2.5rem] border-white/10 shadow-2xl overflow-hidden",
-                isDark ? "bg-surface-950/40" : "bg-white/30"
+                "glass-card !rounded-[2.5rem] border-border shadow-2xl overflow-hidden",
+                isDark ? "bg-surface-950/40" : "bg-white/50 backdrop-blur-xl"
             )}
         >
             {/* Glossy Overlay */}
@@ -89,7 +89,7 @@ export default function Sidebar() {
                             exit={{ opacity: 0, x: -10 }}
                             className="flex flex-col min-w-0"
                         >
-                            <span className="text-lg font-display font-black text-white tracking-tight leading-none uppercase">MakerHQ</span>
+                            <span className="text-lg font-display font-black text-text-primary tracking-tight leading-none uppercase">MakerHQ</span>
                             <span className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mt-1.5 opacity-80">Sync Platform</span>
                         </motion.div>
                     )}
@@ -108,8 +108,8 @@ export default function Sidebar() {
                                 className={cn(
                                     "relative flex items-center h-12 rounded-2xl transition-all duration-300 px-4",
                                     isActive 
-                                        ? "text-white bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] border border-white/5" 
-                                        : "text-text-muted hover:text-white hover:bg-white/[0.04]"
+                                        ? "text-primary dark:text-white bg-gradient-to-r from-primary/10 to-secondary/10 dark:bg-white/5 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.12)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] border border-primary/10 dark:border-white/5" 
+                                        : "text-text-muted hover:text-text-primary hover:bg-black/[0.02] dark:hover:bg-white/[0.04]"
                                 )}
                             >
                                 {isActive && (
@@ -141,7 +141,7 @@ export default function Sidebar() {
                                 </AnimatePresence>
 
                                 {isCollapsed && (
-                                    <div className="absolute left-full ml-6 px-4 py-2.5 rounded-xl bg-surface-950 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-elevated z-50">
+                                    <div className="absolute left-full ml-6 px-4 py-2.5 rounded-xl bg-surface-950 border border-border text-[10px] font-black uppercase tracking-widest text-white opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none whitespace-nowrap shadow-elevated z-50">
                                         {item.label}
                                     </div>
                                 )}
@@ -162,11 +162,11 @@ export default function Sidebar() {
                         )}
                     >
                         <div className="relative shrink-0">
-                            <div className="w-11 h-11 rounded-2xl bg-surface-800 border border-white/10 overflow-hidden shadow-inner p-0.5">
+                            <div className="w-11 h-11 rounded-2xl bg-surface-800 border border-border overflow-hidden shadow-inner p-0.5">
                                 {profile?.avatar_url || profile?.logo_url ? (
                                     <img src={profile.avatar_url || profile.logo_url} alt="" className="w-full h-full object-cover rounded-[14px]" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-700 to-surface-900 text-white font-black text-xs uppercase">
+                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-700 to-surface-900 text-text-primary font-black text-xs uppercase">
                                         {displayName.charAt(0)}
                                     </div>
                                 )}
@@ -180,7 +180,7 @@ export default function Sidebar() {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="flex flex-col min-w-0"
                             >
-                                <span className="text-sm font-bold text-white truncate leading-tight">{displayName}</span>
+                                <span className="text-sm font-bold text-text-primary truncate leading-tight">{displayName}</span>
                                 <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.2em] mt-1 flex items-center gap-1.5">
                                     <div className="w-1 h-1 rounded-full bg-primary" />
                                     {role} Node

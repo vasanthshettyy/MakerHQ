@@ -7,8 +7,30 @@
    Final Consistency Pass - Part 7
    =========================== */
 
-@theme {
-  /* Brand Colors - Deep & Vibrant */
+:root {
+  /* Default: Light Mode Colors matching the premium dashboard layout */
+  --bg-primary: #F4F5F9;
+  --bg-surface-950: #FFFFFF;
+  --bg-surface-900: #F8FAFC;
+  --bg-surface-800: #F1F5F9;
+  --bg-surface-700: #E2E8F0;
+  --bg-surface-600: #CBD5E1;
+  --bg-surface-500: #94A3B8;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-dim: #94A3B8;
+
+  --border-color: rgba(0, 0, 0, 0.06);
+  --glass-surface: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-border-bright: rgba(0, 0, 0, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.4);
+
+  --shadow-premium: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 4px 20px rgba(0, 0, 0, 0.03);
+  --shadow-elevated: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+
   --color-primary: #6366F1;
   --color-primary-light: #818CF8;
   --color-primary-dark: #4F46E5;
@@ -20,40 +42,97 @@
   --color-accent-light: #FB7185;
   --color-accent-dark: #BE123C;
 
+  --color-primary-glow: rgba(99, 102, 241, 0.06);
+  --color-accent-glow: rgba(45, 212, 191, 0.06);
+}
+
+.dark {
+  /* Premium Dark Mode Colors (OLED Ready) */
+  --bg-primary: #020205;
+  --bg-surface-950: #050508;
+  --bg-surface-900: #0A0A0F;
+  --bg-surface-800: #12121A;
+  --bg-surface-700: #1A1A24;
+  --bg-surface-600: #242433;
+  --bg-surface-500: #2E2E42;
+
+  --text-primary: #FDFDFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-dim: #475569;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --glass-surface: rgba(10, 10, 18, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-bright: rgba(255, 255, 255, 0.18);
+  --glass-highlight: rgba(255, 255, 255, 0.03);
+
+  --shadow-premium: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+
+  --color-primary: #6366F1;
+  --color-primary-light: #818CF8;
+  --color-primary-dark: #4F46E5;
+  --color-secondary: #8B5CF6;
+  --color-secondary-light: #A78BFA;
+  --color-secondary-dark: #7C3AED;
+
+  --color-accent: #E11D48;
+  --color-accent-light: #FB7185;
+  --color-accent-dark: #BE123C;
+
+  --color-primary-glow: rgba(99, 102, 241, 0.18);
+  --color-accent-glow: rgba(225, 29, 72, 0.18);
+}
+
+@theme {
+  /* Brand Colors - Deep & Vibrant */
+  --color-primary: var(--color-primary);
+  --color-primary-light: var(--color-primary-light);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-light: var(--color-secondary-light);
+  --color-secondary-dark: var(--color-secondary-dark);
+
+  --color-accent: var(--color-accent);
+  --color-accent-light: var(--color-accent-light);
+  --color-accent-dark: var(--color-accent-dark);
+
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
-  /* Premium Dark Surfaces (OLED Ready) */
-  --color-background: #020205;
-  --color-surface-950: #050508;
-  --color-surface-900: #0A0A0F;
-  --color-surface-800: #12121A;
-  --color-surface-700: #1A1A24;
-  --color-surface-600: #242433;
-  --color-surface-500: #2E2E42;
+  /* Premium Surfaces */
+  --color-background: var(--bg-primary);
+  --color-surface-950: var(--bg-surface-950);
+  --color-surface-900: var(--bg-surface-900);
+  --color-surface-800: var(--bg-surface-800);
+  --color-surface-700: var(--bg-surface-700);
+  --color-surface-600: var(--bg-surface-600);
+  --color-surface-500: var(--bg-surface-500);
 
   /* Typography Colors */
-  --color-text-primary: #FDFDFF;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-  --color-text-dim: #475569;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
 
   /* Apple-style Blur & Glass */
-  --color-glass-surface: rgba(10, 10, 18, 0.45);
-  --color-glass-border: rgba(255, 255, 255, 0.12);
-  --color-glass-border-bright: rgba(255, 255, 255, 0.18);
-  --color-glass-highlight: rgba(255, 255, 255, 0.03);
+  --color-glass-surface: var(--glass-surface);
+  --color-glass-border: var(--glass-border);
+  --color-glass-border-bright: var(--glass-border-bright);
+  --color-glass-highlight: var(--glass-highlight);
+  --color-border: var(--border-color);
 
   /* Elevation Shadows (Multi-layered) */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.1);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.1);
-  --shadow-premium: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-premium: var(--shadow-premium);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
-  --shadow-elevated: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+  --shadow-elevated: var(--shadow-elevated);
 
   /* Animation Presets */
   --animate-pulse-subtle: pulseSubtle 3s infinite ease-in-out;
@@ -63,13 +142,10 @@
   --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Landing Page Variables */
-  --color-primary: hsl(262 83% 68%);
-  --color-primary-glow: hsl(262 83% 68% / 0.35);
-  --color-accent: hsl(174 72% 56%);
-  --color-accent-glow: hsl(174 72% 56% / 0.35);
-  --color-bg: hsl(222.2 84% 4.9%);
-  --color-card: rgba(15, 23, 42, 0.45);
-  --color-border: rgba(148, 163, 184, 0.12);
+  --color-primary-glow: var(--color-primary-glow);
+  --color-accent-glow: var(--color-accent-glow);
+  --color-bg: var(--bg-primary);
+  --color-card: var(--glass-surface);
 
   --font-display: "Cabinet Grotesk", "Clash Display", "Outfit", sans-serif;
   --font-body: "Inter", sans-serif;
@@ -129,9 +205,10 @@
   }
 
   .glass-card:hover {
-    @apply border-white/10 -translate-y-0.5;
-    background: rgba(20, 20, 35, 0.75);
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    @apply -translate-y-0.5;
+    border-color: var(--glass-border-bright);
+    background: var(--glass-surface);
+    box-shadow: var(--shadow-elevated);
   }
 
   /* Sub-border Utility */
@@ -247,4 +324,108 @@
 @keyframes grid-pulse {
   0%, 100% { opacity: 0.18; }
   50%      { opacity: 0.32; }
+}
+
+/* ==========================================================================
+   Premium Light Mode Specific Overrides
+   ========================================================================== */
+
+.light {
+  color-scheme: light;
+}
+
+.light body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.light .text-white {
+  color: var(--text-primary) !important;
+}
+
+.light .glass-card {
+  background: var(--glass-surface) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--shadow-premium) !important;
+}
+
+.light .glass-card:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: var(--glass-border-bright) !important;
+  box-shadow: var(--shadow-elevated) !important;
+}
+
+.light .btn-primary,
+.light .btn-primary * {
+  color: #ffffff !important;
+}
+
+.light .btn-secondary {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.light .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Fix table header hover & TD colors in light mode */
+.light .data-table th {
+  background: rgba(0, 0, 0, 0.01) !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-muted) !important;
+}
+
+.light .data-table td {
+  border-color: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-secondary) !important;
+}
+
+.light .data-table tr:hover td {
+  background: rgba(0, 0, 0, 0.01) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fix input fields in light mode */
+.light .input-field {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.light .input-field:focus {
+  border-color: var(--color-primary) !important;
+}
+
+/* Dynamic background support for cards using inline styling */
+.light [class*="bg-surface-900"],
+.light [class*="bg-surface-950"] {
+  background-color: var(--bg-surface-900) !important;
+}
+
+.light [class*="bg-surface-950/40"] {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Override borders specifically */
+.light [class*="border-white/"] {
+  border-color: var(--border-color) !important;
+}
+
+/* Override backgrounds specifically */
+.light [class*="bg-white/"] {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Keep primary buttons and badges readable */
+.light [class*="bg-primary"],
+.light [class*="bg-secondary"],
+.light [class*="bg-gradient-to"] {
+  color: #ffffff !important;
+}
+
+.light [class*="bg-gradient-to"] * {
+  color: #ffffff !important;
 }
